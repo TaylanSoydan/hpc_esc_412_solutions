@@ -64,14 +64,15 @@ int main(int argc, char *argv[]) {
 	for (int j=0; j<100; j++) {
 		float max = 0;
 		for (int k=0; k<100; k++){
-			if (grid(i,j,k)>max);
+			if (grid(i,j,k)>max) {
 				max = grid(i,j,k);
-			projected(i,j)=max;
+			}
+		projected(i,j)=max;
 	}
 	}
 	}
-	//thirdIndex j;
-	//projected = blitz::max(grid,j)
+   //thirdIndex k;
+   //projected = blitz::max(grid,k);
    std::ofstream fout("fout.txt");
    if (fout.is_open()) {
 	   for (int i = 0; i<nGrid; i++) {
