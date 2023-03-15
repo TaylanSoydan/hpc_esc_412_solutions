@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
     float sx, sy, sz;
     float icenter,jcenter,kcenter;
     float Wx, Wy, Wz,W;
+    int i_new, j_new, k_new;
     for(int pn=0; pn<N; ++pn) { 
         float rx = r(pn, 0) + 0.5;
         float ry = r(pn, 1) + 0.5;
@@ -83,31 +84,56 @@ int main(int argc, char *argv[]) {
             for(int j= jstart ; j< jstart +2; j++) {
                 for (int k= kstart ; k< kstart +2; k++) {
                     icenter = i + 0.5; // cell center
-                    sx = icenter/nGrid - rx; // distance from cell center to the particle
+                    //rx -= floor(rx);
+                    sx = rx*nGrid - icenter; // distance from cell center to the particle
+                    //if(sx > 1/2) sx -= 1;
+                    //if(sx < -1/2) sx += 1;
                     Wx = w_cic(sx); // Weight in x dimension , then do the same for y and z
+                    
                     jcenter = j + 0.5; // cell center
-                    sy = jcenter/nGrid - ry; // distance from cell center to the particle
+                    //ry -= floor(ry);
+                    //sy = jcenter - ry; // distance from cell center to the particle
+                    sy = ry*nGrid - jcenter;
+                    //if(sy > 1/2) sy -= 1;
+                    //if(sy < -1/2) sy += 1;
                     Wy = w_cic(sy); // Weight in x dimension , then do the same for y and z
+                    
                     kcenter = k + 0.5; // cell center
-                    sz = kcenter/nGrid - rz; // distance from cell center to the particle
+                    //rz -= floor(rz);
+                    //sz = kcenter - rz; // distance from cell center to the particle
+                    sz = rz*nGrid - kcenter;
+                    //if(sz > 1/2) sz -= 1;
+                    //if(sz < -1/2) sz += 1;
                     Wz = w_cic(sz); // Weight in x dimension , then do the same for y and z
                     W = Wx * Wy * Wz; // total weight
                     //i = (i + nGrid ) % nGrid; //periodic boundary 
                     //j = (j + nGrid ) % nGrid; //periodic boundary
                     //k = (k + nGrid ) % nGrid; //periodic boundary
+                    i_new = i;
+                    j_new = j;
+                    k_new = k;
+                    if (i < 0)  {
+                        i_new = i + nGrid;
+                    }
+                    if (i > nGrid - 1)  {
+                        i_new = i - nGrid;
+                    }
+                    if (j < 0)  {
+                        j_new = j + nGrid;
+                    }
+                    if (j > nGrid - 1)  {
+                        j_new = j - nGrid;
+                    }                    
+                    if (k < 0)  {
+                        k_new = k + nGrid;
+                    }
+                    if (k > nGrid - 1)  {
+                        k_new = k - nGrid;
+                    }
                     std::cout << "    pn = " << pn << " rx: " << rx << " ry: " << ry << " rz: " << rz << " istart: " << istart << " jstart" << jstart << " kstart" << kstart;
-                    std::cout << " i " << i << " j" << j << " k" << k;
-            		std::cout << " icenter: " << icenter << " jcenter: " << jcenter << " kcenter: " << kcenter << " sx "  << sx << " sy " << sy << " sz " << sz << " Wx:   " << Wx << " Wy" << Wy << " Wz " << Wz << "\n";
-                    if (i < 0) {
-                        i += nGrid;
-                    }
-                    if (j < 0) {
-                        j += nGrid;
-                    }
-                    if (k < 0) {
-                        k += nGrid;
-                    }
-                    grid(i,j,k)+=W;
+                    std::cout << " i" << i << " j" << j << " k" << k << " i_new" << i_new << " j_new" << j_new << " k_new" << k_new ;
+            		std::cout << " icenter: " << icenter << " jcenter: " << jcenter << " kcenter: " << kcenter << " sx "  << sx << " sy " << sy << " sz " << sz << " Wx:   " << Wx << " Wy" << Wy << " Wz " << Wz << " W = " << W << "\n";
+                    grid(i_new,j_new,k_new)+=W;
         }}
         
         }
