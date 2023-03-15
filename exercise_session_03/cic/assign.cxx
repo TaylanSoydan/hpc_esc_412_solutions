@@ -6,7 +6,9 @@
 #include "blitz/array.h"
 #include "tipsy.h"
 #include <chrono>
+#include <omp.h>
 using namespace blitz;
+
 
 float w_cic(float s) {
     float abs_s = abs(s);
@@ -71,6 +73,7 @@ int main(int argc, char *argv[]) {
     float icenter,jcenter,kcenter;
     float Wx, Wy, Wz,W;
     int i_new, j_new, k_new;
+    #pragma omp parallel 
     for(int pn=0; pn<N; ++pn) { 
         float rx = r(pn, 0) + 0.5;
         float ry = r(pn, 1) + 0.5;
@@ -79,10 +82,11 @@ int main(int argc, char *argv[]) {
         int istart = (int) floor(rx*nGrid - 0.5);
         int jstart = (int) floor(ry*nGrid - 0.5);
         int kstart = (int) floor(rz*nGrid - 0.5);
-
+       
         for(int i = istart ; i< istart +2; i++) {
             for(int j= jstart ; j< jstart +2; j++) {
                 for (int k= kstart ; k< kstart +2; k++) {
+                    
                     icenter = i + 0.5; // cell center
                     //rx -= floor(rx);
                     sx = rx*nGrid - icenter; // distance from cell center to the particle
@@ -133,12 +137,13 @@ int main(int argc, char *argv[]) {
                     std::cout << "    pn = " << pn << " rx: " << rx << " ry: " << ry << " rz: " << rz << " istart: " << istart << " jstart" << jstart << " kstart" << kstart;
                     std::cout << " i" << i << " j" << j << " k" << k << " i_new" << i_new << " j_new" << j_new << " k_new" << k_new ;
             		std::cout << " icenter: " << icenter << " jcenter: " << jcenter << " kcenter: " << kcenter << " sx "  << sx << " sy " << sy << " sz " << sz << " Wx:   " << Wx << " Wy" << Wy << " Wz " << Wz << " W = " << W << "\n";
+                    #pragma omp atomic
                     grid(i_new,j_new,k_new)+=W;
         }}
         
         }
 
-        }	 
+        }
 
 	
     
