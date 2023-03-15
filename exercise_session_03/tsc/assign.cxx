@@ -75,9 +75,9 @@ int main(int argc, char *argv[]) {
         float ry = r(pn, 1) + 0.5;
         float rz = r(pn, 2) + 0.5;
 
-        int istart = (int) floor((rx*nGrid - 2.0) + 1);
-        int jstart = (int) floor((ry*nGrid - 2.0) + 1);
-        int kstart = (int) floor((rz*nGrid - 2.0) + 1);
+        int istart = (int) floor(rx*nGrid - 1.0);
+        int jstart = (int) floor(ry*nGrid - 1.0);
+        int kstart = (int) floor(rz*nGrid - 1.0);
 
         for(int i = istart ; i< istart +3; i++) {
             for(int j= jstart ; j< jstart +3; j++) {
