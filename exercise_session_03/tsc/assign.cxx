@@ -6,6 +6,7 @@
 #include "blitz/array.h"
 #include "tipsy.h"
 #include <chrono>
+#include <omp.h>
 using namespace blitz;
 
 float w_cic(float s) {
