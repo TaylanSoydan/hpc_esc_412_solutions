@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     float icenter,jcenter,kcenter;
     float Wx, Wy, Wz,W;
     int i_new, j_new, k_new;
-    #pragma omp parallel 
+    #pragma omp parallel for
     for(int pn=0; pn<N; ++pn) { 
         float rx = r(pn, 0) + 0.5;
         float ry = r(pn, 1) + 0.5;

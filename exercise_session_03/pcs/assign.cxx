@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
     float icenter,jcenter,kcenter;
     float Wx, Wy, Wz,W;
     int i_new, j_new, k_new;
+    #pragma omp parallel for
     for(int pn=0; pn<N; ++pn) { 
         std::cout << "    pn = " << pn << " x: " << r(pn, 0) << " y: " << r(pn, 1) << " z: " << r(pn, 2);
         float rx = r(pn, 0) + 0.5;
@@ -120,7 +121,8 @@ int main(int argc, char *argv[]) {
                     }
                     std::cout << "    pn = " << pn << " rx: " << rx << " ry: " << ry << " rz: " << rz << " istart: " << istart << " jstart" << jstart << " kstart" << kstart;
                     std::cout << " i" << i << " j" << j << " k" << k << " i_new" << i_new << " j_new" << j_new << " k_new" << k_new ;
-            		std::cout << " icenter: " << icenter << " jcenter: " << jcenter << " kcenter: " << kcenter << " sx "  << sx << " sy " << sy << " sz " << sz << " Wx:   " << Wx << " Wy" << Wy << " Wz " << Wz << " W = " << W << "\n";
+                    std::cout << " icenter: " << icenter << " jcenter: " << jcenter << " kcenter: " << kcenter << " sx "  << sx << " sy " << sy << " sz " << sz << " Wx:   " << Wx << " Wy" << Wy << " Wz " << Wz << " W = " << W << "\n";
+                    #pragma omp atomic
                     grid(i_new,j_new,k_new)+=W;
         }}
         
