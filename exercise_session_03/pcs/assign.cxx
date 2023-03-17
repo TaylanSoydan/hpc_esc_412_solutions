@@ -32,9 +32,11 @@ float w_tsc(float s) {
 float w_pcs(float s) {
     float abs_s = abs(s);
     if (abs_s < 1.0) {
-        return (1.5 * pow(abs_s, 3) - 2.5 * pow(abs_s, 2) + 1.0);
+        return (1/6 * (4 - 6 * abs_s * abs_s + 3 * abs_s * abs_s * abs_s));
+        //return (1.5 * pow(abs_s, 3) - 2.5 * pow(abs_s, 2) + 1.0);
     } else if (abs_s < 2.0) {
-        return (-0.5 * pow(abs_s, 3) + 2.5 * pow(abs_s, 2) - 4.0 * abs_s + 2.0);
+        return (1/6 * (2 - abs_s * abs_s * abs_s));
+        //return (-0.5 * pow(abs_s, 3) + 2.5 * pow(abs_s, 2) - 4.0 * abs_s + 2.0);
     } else {
         return 0.0;
     }
@@ -74,7 +76,7 @@ int main(int argc, char *argv[]) {
     int i_new, j_new, k_new;
     #pragma omp parallel for
     for(int pn=0; pn<N; ++pn) { 
-        std::cout << "    pn = " << pn << " x: " << r(pn, 0) << " y: " << r(pn, 1) << " z: " << r(pn, 2);
+        //std::cout << "    pn = " << pn << " x: " << r(pn, 0) << " y: " << r(pn, 1) << " z: " << r(pn, 2);
         float rx = r(pn, 0) + 0.5;
         float ry = r(pn, 1) + 0.5;
         float rz = r(pn, 2) + 0.5;
@@ -120,9 +122,9 @@ int main(int argc, char *argv[]) {
                     if (k > nGrid - 1)  {
                         k_new = k - nGrid;
                     }
-                    std::cout << "    pn = " << pn << " rx: " << rx << " ry: " << ry << " rz: " << rz << " istart: " << istart << " jstart" << jstart << " kstart" << kstart;
-                    std::cout << " i" << i << " j" << j << " k" << k << " i_new" << i_new << " j_new" << j_new << " k_new" << k_new ;
-                    std::cout << " icenter: " << icenter << " jcenter: " << jcenter << " kcenter: " << kcenter << " sx "  << sx << " sy " << sy << " sz " << sz << " Wx:   " << Wx << " Wy" << Wy << " Wz " << Wz << " W = " << W << "\n";
+                    //std::cout << "    pn = " << pn << " rx: " << rx << " ry: " << ry << " rz: " << rz << " istart: " << istart << " jstart" << jstart << " kstart" << kstart;
+                    //std::cout << " i" << i << " j" << j << " k" << k << " i_new" << i_new << " j_new" << j_new << " k_new" << k_new ;
+                    //std::cout << " icenter: " << icenter << " jcenter: " << jcenter << " kcenter: " << kcenter << " sx "  << sx << " sy " << sy << " sz " << sz << " Wx:   " << Wx << " Wy" << Wy << " Wz " << Wz << " W = " << W << "\n";
                     #pragma omp atomic
                     grid(i_new,j_new,k_new)+=W;
         }}
