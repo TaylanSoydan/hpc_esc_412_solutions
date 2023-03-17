@@ -32,10 +32,10 @@ float w_tsc(float s) {
 float w_pcs(float s) {
     float abs_s = abs(s);
     if (abs_s < 1.0) {
-        return (1/6 * (4 - 6 * abs_s * abs_s + 3 * abs_s * abs_s * abs_s));
+        return (0.1666666667 * (4 - 6 * abs_s * abs_s + 3 * abs_s * abs_s * abs_s));
         //return (1.5 * pow(abs_s, 3) - 2.5 * pow(abs_s, 2) + 1.0);
     } else if (abs_s < 2.0) {
-        return (1/6 * (2 - abs_s * abs_s * abs_s));
+        return (0.1666666667 * (2 - abs_s * abs_s * abs_s));
         //return (-0.5 * pow(abs_s, 3) + 2.5 * pow(abs_s, 2) - 4.0 * abs_s + 2.0);
     } else {
         return 0.0;
