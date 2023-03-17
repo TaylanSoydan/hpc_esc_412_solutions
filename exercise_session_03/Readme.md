@@ -20,10 +20,7 @@ results and codes are included for each method in its own folder.
 
 Ex4:
 
-For example on the trial of CIC with OMP_NUM_THREADS=4 vs 1, the assignment got nearly 20% faster. PCS had the worst scaling as calculating 64 weights and updating 64 cells becomes the overhead in computation where CIC had the best scaling for the same reason. 
+Below is how PCS scaled with different threads on my local. In theory, PCS should have the worst scaling as calculating 64 weights and updating 64 cells becomes the overhead in computation where CIC should have the best scaling for the same reason. 
 
-CIC - serial
-Mass assignment took: 902.783 seconds
+![image](https://user-images.githubusercontent.com/73917265/225910688-5e3865b5-ff5f-4a23-a0c4-683cdbff24d3.png)
 
-CIC - parallel
-Mass assignment took: 733.118 seconds
