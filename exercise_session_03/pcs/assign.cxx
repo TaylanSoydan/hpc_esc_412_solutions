@@ -34,7 +34,7 @@ float w_pcs(float s) {
     if (abs_s < 1.0) {
         return (0.1666666667 * (4 - 6 * abs_s * abs_s + 3 * abs_s * abs_s * abs_s));
     } else if (abs_s < 2.0) {
-        return (0.1666666667 * (2 - abs_s * abs_s * abs_s));
+        return (0.1666666667 * (2 - abs_s) *(2 - abs_s) * (2 - abs_s));
     } else {
         return 0.0;
     }
