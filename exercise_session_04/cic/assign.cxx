@@ -80,9 +80,8 @@ int main(int argc, char *argv[]) {
     blitz::Array<float, 3> myArray(data, shape, blitz::neverDeleteData); 
     // Create a subarray view with dimensions N × N × N
     blitz::Range all = blitz::Range::all();
-    blitz::Array<float, 3> subArray = myArray(all, all, blitz::Range(0, nGrid-1));
+    blitz::Array<float, 3> subArray = myArray(all, all, blitz::Range(0, nGrid));
     // Create complex array
-    blitz::Array<float,3> padded(data, blitz::shape(nGrid,nGrid,nGrid+2));
     blitz::Array<std::complex<float>,3> kdata(reinterpret_cast<std::complex<float>*>(data), blitz::shape(nGrid,nGrid,nGrid/2+1));
     //////////////////////////////////////////////////////////
 
@@ -166,12 +165,12 @@ int main(int argc, char *argv[]) {
    //thirdIndex k;
    //projected = blitz::max(grid,k);
    const int BATCH = 10; //////////////////////////////////////////////////////////
-    fftwf_plan plan = fftwf_plan_many_dft_r2c(3,         // rank
-                                              dims,        // dimensions
-                                              BATCH,     // number of transforms
-                                              padded.data(), NULL, 1, nGrid * nGrid, // input parameters
-                                              reinterpret_cast<fftwf_complex*>(kdata.data()), NULL, 1, nGrid * (nGrid / 2 + 1), // output parameters
-                                              FFTW_ESTIMATE); // flags
+    fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid,nGrid,nGrid,data,         // rank
+                                             // dims,        // dimensions
+                                             // BATCH,     // number of transforms
+                                              //data, //, NULL, 1, nGrid * nGrid, // input parameters
+                                              reinterpret_cast<fftwf_complex*>(kdata.data()), // output parameters
+                                              FFTW_MEASURE); // flags
     fftwf_execute(plan);
 
     // Destroy plan
