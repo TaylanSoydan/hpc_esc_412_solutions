@@ -47,6 +47,6 @@ int main() {
     nBAD += verify(pcs_weights(11.0,W),W, 9,4,1.0/48,23.0/48,23.0/48,1.0/48);
     nBAD += verify(pcs_weights(11.2,W),W, 9,4,9.0/2000,0.348167,0.590167,0.0571666);
     nBAD += verify(pcs_weights( 0.0,W),W,-2,4,1.0/48,23.0/48,23.0/48,1.0/48);
-
+    std::cout << "nBAD = " << nBAD << "\n";
     return nBAD;
 }
