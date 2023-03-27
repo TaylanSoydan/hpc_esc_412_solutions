@@ -129,7 +129,8 @@ int main(int argc, char *argv[]) {
         }
 
         }	 
-
+   auto sum = blitz::max(grid);
+   std::cout << "sum = " << sum;
 	
     
    auto end_assign = std::chrono::high_resolution_clock::now();
