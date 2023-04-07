@@ -1,4 +1,4 @@
-ls// This uses features from C++17, so you may have to turn this on to compile
+// This uses features from C++17, so you may have to turn this on to compile
 // g++ -std=c++17 -O3 -o assign assign.cxx tipsy.cxx
 #include <iostream>
 #include <cstdint>
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         return errno;
     }
     std::uint64_t N = io.count();
-    int N = io.count(); 
+    // int N = io.count(); 
     // Load particle positions
     std::cerr << "Loading " << N << " particles" << std::endl;
     Array<float,2> r(N,3);
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
    auto start_project = std::chrono::high_resolution_clock::now();
    Array<float,2>projected(nGrid,nGrid);
    thirdIndex k;
-   projected = blitz::max(grid,k);
+   projected = blitz::max(grid_pcs,k);
    auto end_project = std::chrono::high_resolution_clock::now();
    const int BATCH = 10; 
     fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid,nGrid,nGrid,data,         // rank
