@@ -14,9 +14,9 @@
 #include <mpi.h>
 
 using namespace blitz;
-void assign(Array<float, 2> &r, int N, int nGrid, Array<float, 3> &grid) {
+void assign(Array<float, 2> &r, int N, int nGrid, Array<float, 3> &grid, int istart,int iend) {
     #pragma omp parallel for
-    for(int pn=0; pn<N; pn++) { 
+    for(int pn=istart; pn<iend; pn++) { 
         float rx = r(pn, 0) + 0.5;
         float ry = r(pn, 1) + 0.5;
         float rz = r(pn, 2) + 0.5;
@@ -96,7 +96,8 @@ int main(int argc, char *argv[]) {
     Array<float, 3> grid = grid_data(Range::all(), Range::all(), Range(0, nGrid - 1));
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     blitz::Array<std::complex<float>, 3> kdata(complex_data, shape(nGrid, nGrid, nGrid / 2 + 1));
-
+    assign(r, iend - istart, nGrid, grid, istart, iend);
+    std::cout << "rank = " << irank << "sum = " << blitz::sum(grid); 
     //overdensity(r, N, nGrid, grid);
 
     //std::cout << "Shape of array: (" << grid.shape()[0] << ", " << grid.shape()[1] << ", " << grid.shape()[2] << ")" << std::endl;
@@ -110,7 +111,7 @@ int main(int argc, char *argv[]) {
     }
     // Only the root process (rank 0) will have the complete grid
     if (irank == 0) {
-        assign(r,N,nGrid,grid);
+        //assign(r,N,nGrid,grid,istart,iend);
         auto sum_pcs = blitz::sum(grid);
         std::cout << "pcs total = " << sum_pcs << "\n";
         float mean_pcs = sum_pcs / (nGrid * nGrid * nGrid);
@@ -260,7 +261,7 @@ int main(int argc, char *argv[]) {
         // Write k and Pk arrays to file
         for (int i = 0; i < nBins; i++) {
             outFilelog << i << " " << avgPowerlog(i) << std::endl;
-        }
+        }}
 
     
     MPI_Finalize();
