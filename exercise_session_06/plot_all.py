@@ -41,5 +41,5 @@ axs[2].set_ylabel('y')
 axs[2].set_title(args.filename3)
 
 # Save the plot to file
-plt.savefig(args.filename1.replace('.txt', '') + '_combined.png')
+plt.savefig(args.filename1.replace('.txt', '') + '_combined_500grid.png')
 
