@@ -45,13 +45,12 @@ void assign(Array<float, 2> &r, int N, int nGrid, Array<float, 3> &grid) {
 
 int main(int argc, char *argv[]) {
     // Initialize MPI
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, NULL);
+    MPI_Init_thread(nullptr, nullptr, MPI_THREAD_MULTIPLE, NULL);
     int irank, Nrank;
     MPI_Comm_rank(MPI_COMM_WORLD, &irank);
     MPI_Comm_size(MPI_COMM_WORLD, &Nrank);
 
     // Read
-    auto start_read = std::chrono::high_resolution_clock::now();
     if (argc<=1) {
         std::cerr << "Usage: " << argv[0] << " tipsyfile.std [grid-size]"
                     << std::endl;
@@ -82,7 +81,8 @@ int main(int argc, char *argv[]) {
 
     std::cerr << "Rank " << irank << " loading particles " << istart << " to " << iend-1 << std::endl;
     //Array<float, 2> r(iend - istart, 3);
-    r(Range(istart, iend-1),2);
+    Array<float, 2> r(Range(istart, iend-1),Range(0,2));
+    //Array<float, 2> r(Range(0,2);
     //io.seekpos(istart);
     //io.seekpos(istart * sizeof(float) * 3);
     io.load(r);
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
         MPI_Reduce(MPI_IN_PLACE, grid.data(), grid_data.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     }
     else {
-        MPI_Reduce(grid_data().data(), nullptr, grid_data.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Reduce(grid_data.data(), nullptr, grid_data.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     }
     // Only the root process (rank 0) will have the complete grid
     if (irank == 0) {
@@ -117,8 +117,6 @@ int main(int argc, char *argv[]) {
         grid -= mean_pcs;
         grid /= mean_pcs;
         std::cout << "over density calculated. \n";
-        std::cout << "Mass assignment took: " << elapsed_assign/1e9 << " seconds\n";
-
         fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex*)complex_data, FFTW_ESTIMATE);
         cout << "Plan created" << endl;
         fftwf_execute(plan);
@@ -161,7 +159,7 @@ int main(int argc, char *argv[]) {
         cout << "fPower, nPower calculated with 100 bins" << endl;
 
         avgPower = fPower / nPower;
-        for (int i = maxbin - 1; i < nBins; i++){
+        for (int i = 86 - 1; i < nBins; i++){
             avgPower(i) = 0.0;
         }
 
@@ -263,22 +261,6 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < nBins; i++) {
             outFilelog << i << " " << avgPowerlog(i) << std::endl;
         }
-
-        auto elapsed_read = std::chrono::duration_cast<std::chrono::nanoseconds>(end_read - start_read).count();
-        std::cout << "Reading file took: " << elapsed_read/1e9 << " seconds\n";
-        
-        auto elapsed_project = std::chrono::duration_cast<std::chrono::nanoseconds>(end_project - start_project).count();
-        std::cout << "Projection took: " << elapsed_project/1e9 << " seconds\n";
-        std::ofstream fout("fout.txt");
-        if (fout.is_open()) {
-            for (int i = 0; i<nGrid; i++) {
-                for (int j = 0; j<nGrid; j++) {
-                    fout << projected(i,j) << ",";
-                }
-            }
-        }
-        fout.close();
-
 
     
     MPI_Finalize();
