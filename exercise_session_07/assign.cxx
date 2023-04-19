@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
                 if (bin >= nBins) bin = nBins - 1;
                 
                 // Add P(k) to the bin and increment the bin count
-                fPower[bin] += Pk;
-                nPower[bin] += 1;
+                fPower(bin) += Pk;
+                nPower(bin) += 1;
                 //std::cout << " i = " << i << "j = " << j << " k = " << k  << "K = " << K << " Pk = " << Pk << " bin = " << bin << "\n";
                 }
             }
@@ -161,6 +161,9 @@ int main(int argc, char *argv[]) {
         cout << "fPower, nPower calculated with 100 bins" << endl;
 
         avgPower = fPower / nPower;
+        for (int i = maxbin - 1; i < nBins; i++){
+            avgPower(i) = 0.0;
+        }
 
         std::ofstream outFile("bin100.txt"); // Open the output file
         // Write k and Pk arrays to file
@@ -198,14 +201,16 @@ int main(int argc, char *argv[]) {
                 if (bin >= nBins) bin = nBins - 1;
                 
                 // Add P(k) to the bin and increment the bin count
-                fPower80[bin] += Pk;
-                nPower80[bin] += 1;
+                fPower80(bin) += Pk;
+                nPower80(bin) += 1;
                 // std::cout << "80" << kx << ky << kz << K << Pk << bin;
                 }
             }
         }
         cout << "fPower80, nPower80 calculated with 80 bins" << endl;
-        avgPower80 = fPower80 / nPower80;
+        for (int i; i < nBins; i++){
+            if (nPower80(i)) avgPower80(i) = fPower80(i) / nPower80(i);;
+        }
         std::ofstream outFile80("bin80.txt"); // Open the output file
 
         // Write k and Pk arrays to file
@@ -241,15 +246,17 @@ int main(int argc, char *argv[]) {
                 if (bin >= nBins) bin = nBins - 1;
                 
                 // Add P(k) to the bin and increment the bin count
-                fPowerlog[bin] += Pk;
-                nPowerlog[bin] += 1;
+                fPowerlog(bin) += Pk;
+                nPowerlog(bin) += 1;
                 // std::cout << "80" << kx << ky << kz << K << Pk << bin;
                 }
             }
         }
 
         cout << "fPowerlog, nPowerlog calculated with log bins" << endl;
-        avgPowerlog = fPowerlog / nPowerlog;
+        for (int i; i < nBins; i++){
+            if (nPowerlog(i)) avgPowerlog(i) = fPowerlog(i) / nPowerlog(i);;
+        }
         std::ofstream outFilelog("binlog.txt"); // Open the output file
 
         // Write k and Pk arrays to file

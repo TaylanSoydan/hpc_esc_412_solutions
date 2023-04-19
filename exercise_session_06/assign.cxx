@@ -14,8 +14,6 @@
 using namespace blitz;
 void overdensity(Array<float, 2> &r, int N, int nGrid, Array<float, 3> &grid) {
     auto start_assign = std::chrono::high_resolution_clock::now();
-
-    //PCS
     #pragma omp parallel for
     for(int pn=0; pn<N; pn++) { 
         float rx = r(pn, 0) + 0.5;
@@ -45,13 +43,16 @@ void overdensity(Array<float, 2> &r, int N, int nGrid, Array<float, 3> &grid) {
     auto sum_pcs = blitz::sum(grid);
     std::cout << "pcs total = " << sum_pcs << "\n";
     float mean_pcs = sum_pcs / (nGrid * nGrid * nGrid);
+    cout << "mean_pcs = " << mean_pcs; 
     grid -= mean_pcs;
     grid /= mean_pcs;
     std::cout << "over density calculated. \n";
     auto end_assign = std::chrono::high_resolution_clock::now();
     auto elapsed_assign = std::chrono::duration_cast<std::chrono::nanoseconds>(end_assign - start_assign).count();
     std::cout << "Mass assignment took: " << elapsed_assign/1e9 << " seconds\n";
-    }
+    auto sum_overdensity = blitz::sum(grid);
+    std::cout << "overdensity total = " << sum_overdensity << "\n";
+}
 
 int main(int argc, char *argv[]) {
     // Read
@@ -86,9 +87,9 @@ int main(int argc, char *argv[]) {
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     blitz::Array<std::complex<float>, 3> kdata(complex_data, shape(nGrid, nGrid, nGrid / 2 + 1));
     overdensity(r, N, nGrid, grid);
-
+    //std:cout << grid << endl;
+    //std:cout << kdata << endl;
     //std::cout << "Shape of array: (" << grid.shape()[0] << ", " << grid.shape()[1] << ", " << grid.shape()[2] << ")" << std::endl;
-
 
     fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
     cout << "Plan created" << endl;
@@ -96,17 +97,11 @@ int main(int argc, char *argv[]) {
     cout << "Plan executed" << endl;
     fftwf_destroy_plan(plan);
     cout << "Plan destroyed" << endl;
+
+    std::cout << std::norm(kdata(0,0,0)) << endl;
     std::cout << "Shape of kdata: (" << kdata.shape()[0] << ", " << kdata.shape()[1] << ", " << kdata.shape()[2] << ")" << std::endl;
     //std::cout << "norm = " << std::norm(kdata(5,5,5));
-
-    auto start_project = std::chrono::high_resolution_clock::now();
-    // Projection
-    Array<float,2>projected(nGrid,nGrid);
-    thirdIndex ti;
-    projected = blitz::max(grid,ti);
-    
-    auto end_project = std::chrono::high_resolution_clock::now();
-
+    std::cout << " kdata SUM = " << blitz::sum(kdata) << endl;
     // Initialize K
     int nBins = nGrid;
     Array<float,1> fPower(nBins);
@@ -115,6 +110,8 @@ int main(int argc, char *argv[]) {
     nPower = 0;
     Array<float,1> avgPower(nBins);
     avgPower = 0.0;
+    auto maxK = 0.0;
+    auto maxbin = 0;
     // Calculating K and Binning with ibin = k
     for (int i = 0; i < nGrid; i++) {
         for (int j = 0; j < nGrid; j++) {
@@ -133,16 +130,27 @@ int main(int argc, char *argv[]) {
             if (bin >= nBins) bin = nBins - 1;
             
             // Add P(k) to the bin and increment the bin count
-            fPower[bin] += Pk;
-            nPower[bin] += 1;
+            fPower(bin) += Pk;
+            nPower(bin) += 1;
+            //std::cout << " bin = " << bin;
+            if (K > maxK) maxK = K;
+            if (bin > maxbin) maxbin = bin;
+            
+            //std::cout << " maxK = " << maxK;
             //std::cout << " i = " << i << "j = " << j << " k = " << k  << "K = " << K << " Pk = " << Pk << " bin = " << bin << "\n";
             }
         }
     }
+    std::cout << " maxbin = " << maxbin;
     cout << "fPower, nPower calculated with 100 bins" << endl;
-
+    //for (int i = maxK; i < 100; i++){
+    //    std::cout << " fPower = " << fPower(i) << " nPower = " << nPower(i);
+    //}
     avgPower = fPower / nPower;
-
+    for (int i = maxbin - 1; i < nBins; i++){
+        avgPower(i) = 0.0;
+    }
+    std::cout << " fPower SUM = " << blitz::sum(fPower) << " nPower SUM = " <<blitz::sum(nPower);
     std::ofstream outFile("bin100.txt"); // Open the output file
     // Write k and Pk arrays to file
     for (int i = 0; i < nBins; i++) {
@@ -179,14 +187,16 @@ int main(int argc, char *argv[]) {
             if (bin >= nBins) bin = nBins - 1;
             
             // Add P(k) to the bin and increment the bin count
-            fPower80[bin] += Pk;
-            nPower80[bin] += 1;
+            fPower80(bin) += Pk;
+            nPower80(bin) += 1;
             // std::cout << "80" << kx << ky << kz << K << Pk << bin;
             }
         }
     }
     cout << "fPower80, nPower80 calculated with 80 bins" << endl;
-    avgPower80 = fPower80 / nPower80;
+    for (int i; i < nBins; i++){
+        if (nPower80(i)) avgPower80(i) = fPower80(i) / nPower80(i);;
+    }
     std::ofstream outFile80("bin80.txt"); // Open the output file
 
     // Write k and Pk arrays to file
@@ -220,17 +230,19 @@ int main(int argc, char *argv[]) {
             int bin = int( (std::log(K) / std::log(Kmax)) * nBins);
             if (K < 0.00001) bin = 0;
             if (bin >= nBins) bin = nBins - 1;
-            
             // Add P(k) to the bin and increment the bin count
-            fPowerlog[bin] += Pk;
-            nPowerlog[bin] += 1;
+            fPowerlog(bin) += Pk;
+            nPowerlog(bin) += 1;
             // std::cout << "80" << kx << ky << kz << K << Pk << bin;
             }
         }
     }
+    for (int i; i < nBins; i++){
+        if (nPowerlog(i)) avgPowerlog(i) = fPowerlog(i) / nPowerlog(i);;
+    }
 
     cout << "fPowerlog, nPowerlog calculated with log bins" << endl;
-    avgPowerlog = fPowerlog / nPowerlog;
+    
     std::ofstream outFilelog("binlog.txt"); // Open the output file
 
     // Write k and Pk arrays to file
@@ -240,18 +252,6 @@ int main(int argc, char *argv[]) {
 
     auto elapsed_read = std::chrono::duration_cast<std::chrono::nanoseconds>(end_read - start_read).count();
     std::cout << "Reading file took: " << elapsed_read/1e9 << " seconds\n";
-    
-    auto elapsed_project = std::chrono::duration_cast<std::chrono::nanoseconds>(end_project - start_project).count();
-    std::cout << "Projection took: " << elapsed_project/1e9 << " seconds\n";
-    std::ofstream fout("fout.txt");
-    if (fout.is_open()) {
-        for (int i = 0; i<nGrid; i++) {
-            for (int j = 0; j<nGrid; j++) {
-                fout << projected(i,j) << ",";
-            }
-        }
-    }
-    fout.close();
 
     //delete[] fft_data; 
 
