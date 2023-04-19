@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     cout << "starting 80 bins" << endl;
    
     // Calculating K and Binning with ibin = (k - kmax) / nbins
-    double Kmax = nGrid * sqrt(3);
+    double Kmax = floor(nGrid/2 * sqrt(3));
     nBins = 80;
     Array<float,1> fPower80(nBins);
     fPower80 = 0.0;
