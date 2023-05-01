@@ -269,7 +269,8 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (rank == 0){
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
 
     for (int i = i_start; i < i_end-1; ++i){
@@ -277,18 +278,18 @@ int main(int argc, char *argv[]){
             std::cout << "r not sorted properly" << "\n";
         }
     }
-
-
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
 
     int * slab_cut_indexes = new int [N_rank-1];
     int counter = 0;
-    int particle_index;
+    int particle_slab;
     std::cout<< "starting to find slab cut indexes" << "\n";
     for (int i = i_start; i < i_end; ++i){
-        int particle_index = int((r(i, 0) + 0.5)*nGrid);
-        int next_particle_index = int((r(i+1, 0) + 0.5)*nGrid);
-        int particle_rank = SLAB2RANK[particle_index];
-        int next_particle_rank = SLAB2RANK[next_particle_index];
+        int particle_slab = int((r(i, 0) + 0.5)*nGrid);
+        int next_particle_slab = int((r(i+1, 0) + 0.5)*nGrid);
+        int particle_rank = SLAB2RANK[particle_slab];
+        int next_particle_rank = SLAB2RANK[next_particle_slab];
 
         //std::cout << "cut_point = " << i+1-i_start << "r = "<< r(i, 0) << "int((r(i, 0) + 0.5)) = " <<int((r(i, 0) + 0.5))  << "ngrid = " << nGrid<< "\n";
         if (next_particle_rank > particle_rank) {
@@ -301,6 +302,7 @@ int main(int argc, char *argv[]){
             counter++;
         }}
     std::cout<< "finished slab cut indexes" << "\n";
+
 
     for (int i = 0; i < (N_rank - 1); ++i){
         std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
