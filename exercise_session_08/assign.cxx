@@ -268,66 +268,49 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    std::cout << "first particle before sort x = " << r(i_start + 1000,0) << "\n";
+    std::cout << "first particle before sort x = " << r(i_start,0) << "\n";
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
-    std::cout << "first particle after sort x = " << r(i_start + 1000,0) << "\n";
+    std::cout << "first particle after sort x = " << r(i_start,0) << "\n";
     
 
-    int * slab_cut_indexes = new int [N_rank-1];
-    int nSlabs = N_rank;
-    int slab_size = nGrid / nSlabs;
-    int last_particle_index = 0;
-    int last_slab_index = -1;
-    for (int i = i_start; i < i_end; ++i) {
-        int slab_index = int((r(i, 0) + 0.5) * nSlabs / nGrid);
-        if (slab_index != last_slab_index) {
-            slab_cut_indexes[slab_index] = last_particle_index;
-            last_slab_index = slab_index;
-        }
-        last_particle_index = i;
-    }
-    slab_cut_indexes[nSlabs] = i_end - i_start;
 
+
+
+    int * slab_cut_indexes = new int [N_rank-1];
+    int counter = 0;
+    int particle_index;
+    std::cout<< "starting to find slab cut indexes" << "\n";
+    for (int i = i_start; i < i_end; ++i){
+        int particle_index = int((r(i, 0) + 0.5)*nGrid);
+        int next_particle_index = int((r(i+1, 0) + 0.5)*nGrid);
+        int particle_rank = SLAB2RANK[particle_index];
+        int next_particle_rank = SLAB2RANK[next_particle_index];
+
+        //std::cout << "cut_point = " << i+1-i_start << "r = "<< r(i, 0) << "int((r(i, 0) + 0.5)) = " <<int((r(i, 0) + 0.5))  << "ngrid = " << nGrid<< "\n";
+        if (next_particle_rank > particle_rank) {
+
+            std::cout << "r(i, 0) + 0.5 = " << r(i, 0) + 0.5 << " " << "r(i+1, 0) + 0.5 = " << r(i+1, 0) + 0.5 << "\n";
+            std::cout << "particle_rank = " << particle_rank << " " << "next particle rank = " << next_particle_rank << "\n";
+            std::cout<<" will be cut at " << i+1-i_start << "\n";
+            slab_cut_indexes[counter] = i+1-i_start;
+            counter++;
+        }}
+    std::cout<< "finished slab cut indexes" << "\n";
 
     for (int i = 0; i < (N_rank - 1); ++i){
-        std::cout << "slab_cut_indexes = " << slab_cut_indexes[i] << "\n";
+        std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
     }
-
-
-    //int * slab_cut_indexes = new int [N_rank-1];
-    //int counter = 0;
-    //int particle_index;
-    //std::cout<< "starting to find slab cut indexes" << "\n";
-    //for (int i = i_start; i < i_end; ++i){
-    //    int particle_index = int((r(i, 0) + 0.5)*nGrid);
-    //    int next_particle_index = int((r(i+1, 0) + 0.5)*nGrid);
-    //    
-    //    //std::cout << "cut_point = " << i+1-i_start << "r = "<< r(i, 0) << "int((r(i, 0) + 0.5)) = " <<int((r(i, 0) + 0.5))  << "ngrid = " << nGrid<< "\n";
-    //    if (next_particle_index > particle_index) {
-    //        
-    //        std::cout << "r(i, 0) + 0.5 = " << r(i, 0) + 0.5 << " " << "r(i+1, 0) + 0.5 = " << r(i+1, 0) + 0.5 << "\n";
-    //        std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "\n";
-    //        std::cout<<" will be cut at " << i+1-i_start << "\n";
-    //        //assert (counter < int(nGrid / N_rank));
-    //        slab_cut_indexes[counter] = i+1-i_start;
-    //        counter++;
-    //    }}
-    //std::cout<< "finished slab cut indexes" << "\n";
-
-for (int i = 0; i < (N_rank - 1); ++i){
-    std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
-}
 
 //for (int i = 0; i < N_rank - 1; ++i){
   //  assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
 //}
 
-int* num_particles_to_send = new int[N_rank];
-int* num_particles_to_recv = new int[N_rank];
-for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
-int total_num_particles_to_send = 0;
-for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
-std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << "\n";
+    int* num_particles_to_send = new int[N_rank];
+    int* num_particles_to_recv = new int[N_rank];
+    for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+    int total_num_particles_to_send = 0;
+    for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
+    std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << "\n";
 //    assert (total_num_particles_to_send == (i_end - i_start));
 
 //MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
