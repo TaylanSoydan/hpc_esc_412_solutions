@@ -269,7 +269,7 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    MPI_Barrier(MPI_COMM_WORLD);
+    
     if (i_rank == 0){
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
 
@@ -279,7 +279,7 @@ int main(int argc, char *argv[]){
         }
     }
     }
-    MPI_Barrier(MPI_COMM_WORLD);
+    
 
     int * slab_cut_indexes = new int [N_rank-1];
     int counter = 0;
