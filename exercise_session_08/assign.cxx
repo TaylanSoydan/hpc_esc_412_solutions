@@ -283,8 +283,9 @@ for (int i = i_start; i < i_end; ++i){
     
     //std::cout << "cut_point = " << i+1-i_start << "r = "<< r(i, 0) << "int((r(i, 0) + 0.5)) = " <<int((r(i, 0) + 0.5))  << "ngrid = " << nGrid<< "\n";
     if (next_particle_index > particle_index) {
-        //std::cout << "r(i, 0) + 0.5 = " << r(i, 0) + 0.5 << " " << "r(i+1, 0) + 0.5 = " << r(i+1, 0) + 0.5 << "\n";
-        //std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "\n";
+        std::cout<<"cut found" << "\n";
+        std::cout << "r(i, 0) + 0.5 = " << r(i, 0) + 0.5 << " " << "r(i+1, 0) + 0.5 = " << r(i+1, 0) + 0.5 << "\n";
+        std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "\n";
         
         //assert (counter < int(nGrid / N_rank));
         slab_cut_indexes[counter] = i+1-i_start;
@@ -308,7 +309,7 @@ for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to
 std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << "\n";
 //    assert (total_num_particles_to_send == (i_end - i_start));
 
-MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
+//MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
 
 //int total_num_particles_to_recv = 0;
 //for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
