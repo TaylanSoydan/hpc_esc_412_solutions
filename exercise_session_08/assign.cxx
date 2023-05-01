@@ -263,8 +263,9 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    std::cout << "first particle before sort x = " << r(0,0) << "s\n";
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
+    std::cout << "first particle after sort x = " << r(0,0) << "s\n";
     
 
     int * slab_cut_indexes = new int [N_rank-1];
@@ -274,7 +275,7 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < N - 1; ++i){
         int particle_index = int(floor((r(i, 0) + 0.5))*nGrid);
         int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
-        std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "s\n";
+        //std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "s\n";
         if (next_particle_index > particle_index) {
             std::cout << "cut_point = " <<i+1 << " " << "nGrid/N_rank = " << int(nGrid / N_rank) << "s\n";
             assert (counter < int(nGrid / N_rank));
