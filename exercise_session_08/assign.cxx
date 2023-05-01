@@ -241,6 +241,10 @@ int main(int argc, char *argv[]){
         SLAB2RANK[i] = current;
     }
     std::cout << "SLAB2RANK[17] = " << SLAB2RANK[17] << "\n";
+    std::cout << "SLAB2RANK[27] = " << SLAB2RANK[27] << "\n";
+    std::cout << "SLAB2RANK[37] = " << SLAB2RANK[37] << "\n";
+    std::cout << "SLAB2RANK[47] = " << SLAB2RANK[47] << "\n";
+    std::cout << "SLAB2RANK[87] = " << SLAB2RANK[87] << "\n";
     auto start_time = std::chrono::high_resolution_clock::now();
 
     TipsyIO io;
