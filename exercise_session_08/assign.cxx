@@ -270,7 +270,7 @@ int main(int argc, char *argv[]){
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     MPI_Barrier(MPI_COMM_WORLD);
-    if (rank == 0){
+    if (i_rank == 0){
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
 
     for (int i = i_start; i < i_end-1; ++i){
