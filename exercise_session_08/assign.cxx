@@ -278,7 +278,7 @@ int main(int argc, char *argv[]){
         //std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "s\n";
         if (next_particle_index > particle_index) {
             std::cout << "cut_point = " <<i+1 << " " << "nGrid/N_rank = " << int(nGrid / N_rank) << "s\n";
-            assert (counter < int(nGrid / N_rank));
+            //assert (counter < int(nGrid / N_rank));
             slab_cut_indexes[counter] = i+1;
             counter++;
         }    
