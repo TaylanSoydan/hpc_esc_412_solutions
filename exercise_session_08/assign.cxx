@@ -283,7 +283,7 @@ int main(int argc, char *argv[]){
             counter++;
         }}
     std::cout<< "finished slab cut indexes" << "\n";
-    for (int i = 0; i< N_rank - 1; ++i){
+    for (int i = 0; i < (N_rank - 1); ++i){
         std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
     }
 
