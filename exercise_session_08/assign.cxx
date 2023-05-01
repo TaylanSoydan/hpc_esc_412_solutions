@@ -265,16 +265,13 @@ int main(int argc, char *argv[]){
     blitz::Array<float, 2> r(blitz::Range(i_start, i_end - 1), blitz::Range(0, 2));
 
     std::cout << "i am rank = " << i_rank << " i_start, i_end - 1 = " << i_start << "," << i_end - 1 << " \n";
-
-    std::cout << "  r(blitz::Range(i_start, i_end - 1) successfull " << "\n";
     io.load(r);
-    std::cout << "  io.load(r) successfull " << "\n";
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    std::cout << "first particle before sort x = " << r(i_start,0) << "\n";
+    //std::cout << "first particle before sort x = " << r(i_start,0) << "\n";
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
-    std::cout << "first particle after sort x = " << r(i_start,0) << "\n";
+    //std::cout << "first particle after sort x = " << r(i_start,0) << "\n";
     
 
 
@@ -312,7 +309,10 @@ int main(int argc, char *argv[]){
 
     int* num_particles_to_send = new int[N_rank];
     int* num_particles_to_recv = new int[N_rank];
-    for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+    for (int i = 0; i < N_rank; ++i) {
+    num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+    std::cout << "num_particles_to_send [i] = " << num_particles_to_send[i] << "\n";
+    }
     int total_num_particles_to_send = 0;
     for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
     std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << "\n";
