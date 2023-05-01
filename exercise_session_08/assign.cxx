@@ -270,205 +270,205 @@ int main(int argc, char *argv[]){
     std::cout << "first particle after sort x = " << r(0,0) << "\n";
     
 
-    int * slab_cut_indexes = new int [N_rank-1];
-    int counter = 0;
-    int particle_index;
-    std::cout<< "starting to find slab cut indexes" << "\n";
-    for (int i = 0; i < N - 1; ++i){
-        int particle_index = int(floor((r(i, 0) + 0.5))*nGrid);
-        int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
-        //std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "s\n";
-        if (next_particle_index > particle_index) {
-            //std::cout << "cut_point = " <<i+1 << " " << "nGrid/N_rank = " << int(nGrid / N_rank) << "s\n";
-            //assert (counter < int(nGrid / N_rank));
-            slab_cut_indexes[counter] = i+1;
-            counter++;
-        }}
-    std::cout<< "finished slab cut indexes" << "\n";
-    
-    for (int i = 0; i < (N_rank - 1); ++i){
-        std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
-    }
+//int * slab_cut_indexes = new int [N_rank-1];
+//int counter = 0;
+//int particle_index;
+//std::cout<< "starting to find slab cut indexes" << "\n";
+//for (int i = 0; i < N - 1; ++i){
+//    int particle_index = int(floor((r(i, 0) + 0.5))*nGrid);
+//    int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
+//    //std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "s\n";
+//    if (next_particle_index > particle_index) {
+//        //std::cout << "cut_point = " <<i+1 << " " << "nGrid/N_rank = " << int(nGrid / N_rank) << "s\n";
+//        //assert (counter < int(nGrid / N_rank));
+//        slab_cut_indexes[counter] = i+1;
+//        counter++;
+//    }}
+//std::cout<< "finished slab cut indexes" << "\n";
+//
+//for (int i = 0; i < (N_rank - 1); ++i){
+//    std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
+//}
 
-    for (int i = 0; i < N_rank - 1; ++i){
-        assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
-    }
+//for (int i = 0; i < N_rank - 1; ++i){
+//    assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
+//}
 
-    int * num_particles_to_send = new int [N_rank];
-    int * num_particles_to_recv = new int [N_rank];
-    for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
-    int total_num_particles_to_send = 0;
-    for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
-    assert (total_num_particles_to_send == (i_end - i_start));
-    
-    MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
+//int * num_particles_to_send = new int [N_rank];
+//int * num_particles_to_recv = new int [N_rank];
+//for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+//int total_num_particles_to_send = 0;
+//for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
+//assert (total_num_particles_to_send == (i_end - i_start));
+//
+//MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
 
-    int total_num_particles_to_recv = 0;
-    for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
-    
-    int sum_check;
-    MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    assert (sum_check == N);
+//int total_num_particles_to_recv = 0;
+//for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
+//
+//int sum_check;
+//MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+//assert (sum_check == N);
 
-    int* MPISendCount = new int [N_rank];
-    int* MPIRecvCount = new int [N_rank];
-    for (int i = 0; i < N_rank; ++i) {
-        MPISendCount[i] = (num_particles_to_send[i] * 3);
-        MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
-    }
+//int* MPISendCount = new int [N_rank];
+//int* MPIRecvCount = new int [N_rank];
+//for (int i = 0; i < N_rank; ++i) {
+//    MPISendCount[i] = (num_particles_to_send[i] * 3);
+//    MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
+//}
 
-    int* MPISendOffset = new int [N_rank];
-    MPISendOffset[0] = 0;
-    for (int i = 1; i < N_rank; ++i) MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
-    int* MPIRecvOffset = new int [N_rank];
-    MPIRecvOffset[0] = 0;
-    for (int i = 1; i < N_rank; ++i) MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
-
-
-    MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r.data(),MPIRecvCount,MPIRecvOffset,MPI_FLOAT,MPI_COMM_WORLD);
-    delete [] MPISendCount;
-    delete [] MPISendOffset;
-    delete [] MPIRecvCount;
-    delete [] MPIRecvOffset;
-    delete [] num_particles_to_send;
-    delete [] num_particles_to_recv;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    float *data = new (std::align_val_t(64)) float[local0 * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
-    blitz::Array<float, 3> grid_data(data, blitz::shape(local0, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
-    grid_data = 0.0;
-    //blitz::Range new_range(start0, local0 + start0);
-    blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-    grid = 0.0;
-    //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-    std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
-    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(local0, nGrid, nGrid / 2 + 1));
-
-    start_time = std::chrono::high_resolution_clock::now();
-    assign_mass(r, i_start, i_end, nGrid, grid, order);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //MPI_Alltoallv(r.data(), sendcounts.data(), senddispls.data(), MPI_FLOAT,
-    //                new_particles.data(), recvcounts.data(), recvdispls.data(), MPI_FLOAT,
-    //                MPI_COMM_WORLD);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
-    std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
-
-    if (i_rank == 0)
-    {
-        MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-    else
-    {
-        MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-
-    if (i_rank == 0)
-    {
-        // Simple test
-        std::cout << "Sum of all grid mass = " << blitz::sum(grid) << std::endl;
-
-        project_grid(grid, nGrid, out_filename);
-
-        // Convert to overdensity
-        float grid_sum = sum(grid);
-        float mean_density = grid_sum / (nGrid * nGrid * nGrid);
-        grid = (grid - mean_density) / mean_density;
-
-        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
-        fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
-        
-        std::cout << "Plan created" << std::endl;
-        fftwf_execute(plan);
-        std::cout << "Plan executed" << std::endl;
-        fftwf_destroy_plan(plan);
-        std::cout << "Plan destroyed" << std::endl;
-        // Linear binning is 1
-        // Variable binning is 2
-        // Log binning is 3
-        //const int binning = 2;
-        //int n_bins = 80;
-        //if (binning == 1)
-        //{
-        //    n_bins = nGrid;
-        //}
-        //std::vector<float> fPower(n_bins, 0.0);
-        //std::vector<int> nPower(n_bins, 0);
-        //float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
-
-        //// loop over δ(k) and compute k from kx, ky and kz
-        //for (int i = 0; i < nGrid; i++)
-        //{
-        //    int kx = k_indx(i, nGrid);
-        //    for (int j = 0; j < nGrid; j++)
-        //    {
-        //        int ky = k_indx(j, nGrid);
-        //        for (int l = 0; l < nGrid / 2 + 1; l++)
-        //        {
-        //            int kz = l;
-
-        //            float k = sqrt(kx * kx + ky * ky + kz * kz);
-        //            int i_bin = get_i_bin(k, n_bins, nGrid, binning);
-        //            if (i_bin == fPower.size())
-        //                i_bin--;
-        //            fPower[i_bin] += std::norm(kdata(i, j, l));
-        //            nPower[i_bin] += 1;
-        //        }
-        //    }
-        //}
-
-        //save_binning(binning, fPower, nPower);
-        const int binning = 2;
-
-        int n_bins = 80;
-        if (binning == 1)
-        {
-            n_bins = nGrid;
-        }
-        std::vector<float> fPower_local(n_bins, 0.0);
-        std::vector<int> nPower_local(n_bins, 0);
-        float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
-
-        // Determine the start and end index of kx values for each rank
-        int kx_start = i_rank * nGrid / N_rank;
-        int kx_end = (i_rank + 1) * nGrid / N_rank;
-
-        // loop over δ(k) and compute k from kx, ky and kz for the current rank
-        for (int i = kx_start; i < kx_end; i++)
-        {
-            int kx = k_indx(i, nGrid);
-            for (int j = 0; j < nGrid; j++)
-            {
-                int ky = k_indx(j, nGrid);
-                for (int l = 0; l < nGrid / 2 + 1; l++)
-                {
-                    int kz = l;
-
-                    float k = sqrt(kx * kx + ky * ky + kz * kz);
-                    int i_bin = get_i_bin(k, n_bins, nGrid, binning);
-                    if (i_bin == fPower_local.size())
-                        i_bin--;
-                    fPower_local[i_bin] += std::norm(kdata(i, j, l));
-                    nPower_local[i_bin] += 1;
-                }
-            }
-        }
-
-        // Reduce the binned values from all ranks to compute the final P(k) values
-        std::vector<float> fPower(n_bins, 0.0);
-        std::vector<int> nPower(n_bins, 0);
-        MPI_Reduce(fPower_local.data(), fPower.data(), n_bins, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-        MPI_Reduce(nPower_local.data(), nPower.data(), n_bins, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-
-        if (i_rank == 0)
-        {
-            save_binning(binning, fPower, nPower);
-        }
+//int* MPISendOffset = new int [N_rank];
+//MPISendOffset[0] = 0;
+//for (int i = 1; i < N_rank; ++i) MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
+//int* MPIRecvOffset = new int [N_rank];
+//MPIRecvOffset[0] = 0;
+//for (int i = 1; i < N_rank; ++i) MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
 
 
-    }
-    MPI_Finalize();
+//MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r.data(),MPIRecvCount,MPIRecvOffset,MPI_FLOAT,MPI_COMM_WORLD);
+//delete [] MPISendCount;
+//delete [] MPISendOffset;
+//delete [] MPIRecvCount;
+//delete [] MPIRecvOffset;
+//delete [] num_particles_to_send;
+//delete [] num_particles_to_recv;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//float *data = new (std::align_val_t(64)) float[local0 * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
+//blitz::Array<float, 3> grid_data(data, blitz::shape(local0, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
+//grid_data = 0.0;
+////blitz::Range new_range(start0, local0 + start0);
+//blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+//grid = 0.0;
+////blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+//std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
+//blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(local0, nGrid, nGrid / 2 + 1));
+
+//start_time = std::chrono::high_resolution_clock::now();
+//assign_mass(r, i_start, i_end, nGrid, grid, order);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////MPI_Alltoallv(r.data(), sendcounts.data(), senddispls.data(), MPI_FLOAT,
+////                new_particles.data(), recvcounts.data(), recvdispls.data(), MPI_FLOAT,
+////                MPI_COMM_WORLD);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
+//std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
+
+//if (i_rank == 0)
+//{
+//    MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+//}
+//else
+//{
+//    MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+//}
+
+//if (i_rank == 0)
+//{
+//    // Simple test
+//    std::cout << "Sum of all grid mass = " << blitz::sum(grid) << std::endl;
+
+//    project_grid(grid, nGrid, out_filename);
+
+//    // Convert to overdensity
+//    float grid_sum = sum(grid);
+//    float mean_density = grid_sum / (nGrid * nGrid * nGrid);
+//    grid = (grid - mean_density) / mean_density;
+
+//    //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
+//    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
+//    
+//    std::cout << "Plan created" << std::endl;
+//    fftwf_execute(plan);
+//    std::cout << "Plan executed" << std::endl;
+//    fftwf_destroy_plan(plan);
+//    std::cout << "Plan destroyed" << std::endl;
+//    // Linear binning is 1
+//    // Variable binning is 2
+//    // Log binning is 3
+//    //const int binning = 2;
+//    //int n_bins = 80;
+//    //if (binning == 1)
+//    //{
+//    //    n_bins = nGrid;
+//    //}
+//    //std::vector<float> fPower(n_bins, 0.0);
+//    //std::vector<int> nPower(n_bins, 0);
+//    //float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
+
+//    //// loop over δ(k) and compute k from kx, ky and kz
+//    //for (int i = 0; i < nGrid; i++)
+//    //{
+//    //    int kx = k_indx(i, nGrid);
+//    //    for (int j = 0; j < nGrid; j++)
+//    //    {
+//    //        int ky = k_indx(j, nGrid);
+//    //        for (int l = 0; l < nGrid / 2 + 1; l++)
+//    //        {
+//    //            int kz = l;
+
+//    //            float k = sqrt(kx * kx + ky * ky + kz * kz);
+//    //            int i_bin = get_i_bin(k, n_bins, nGrid, binning);
+//    //            if (i_bin == fPower.size())
+//    //                i_bin--;
+//    //            fPower[i_bin] += std::norm(kdata(i, j, l));
+//    //            nPower[i_bin] += 1;
+//    //        }
+//    //    }
+//    //}
+
+//    //save_binning(binning, fPower, nPower);
+//    const int binning = 2;
+
+//    int n_bins = 80;
+//    if (binning == 1)
+//    {
+//        n_bins = nGrid;
+//    }
+//    std::vector<float> fPower_local(n_bins, 0.0);
+//    std::vector<int> nPower_local(n_bins, 0);
+//    float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
+
+//    // Determine the start and end index of kx values for each rank
+//    int kx_start = i_rank * nGrid / N_rank;
+//    int kx_end = (i_rank + 1) * nGrid / N_rank;
+
+//    // loop over δ(k) and compute k from kx, ky and kz for the current rank
+//    for (int i = kx_start; i < kx_end; i++)
+//    {
+//        int kx = k_indx(i, nGrid);
+//        for (int j = 0; j < nGrid; j++)
+//        {
+//            int ky = k_indx(j, nGrid);
+//            for (int l = 0; l < nGrid / 2 + 1; l++)
+//            {
+//                int kz = l;
+
+//                float k = sqrt(kx * kx + ky * ky + kz * kz);
+//                int i_bin = get_i_bin(k, n_bins, nGrid, binning);
+//                if (i_bin == fPower_local.size())
+//                    i_bin--;
+//                fPower_local[i_bin] += std::norm(kdata(i, j, l));
+//                nPower_local[i_bin] += 1;
+//            }
+//        }
+//    }
+
+//    // Reduce the binned values from all ranks to compute the final P(k) values
+//    std::vector<float> fPower(n_bins, 0.0);
+//    std::vector<int> nPower(n_bins, 0);
+//    MPI_Reduce(fPower_local.data(), fPower.data(), n_bins, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+//    MPI_Reduce(nPower_local.data(), nPower.data(), n_bins, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+//    if (i_rank == 0)
+//    {
+//        save_binning(binning, fPower, nPower);
+//    }
+
+
+//}
+//MPI_Finalize();
 }
