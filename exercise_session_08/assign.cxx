@@ -300,8 +300,8 @@ for (int i = 0; i < (N_rank - 1); ++i){
   //  assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
 //}
 
-int * num_particles_to_send = new int [N_rank];
-int * num_particles_to_recv = new int [N_rank];
+int* num_particles_to_send = new int[N_rank];
+int* num_particles_to_recv = new int[N_rank];
 for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
 int total_num_particles_to_send = 0;
 for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
