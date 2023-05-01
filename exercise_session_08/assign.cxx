@@ -290,7 +290,8 @@ int main(int argc, char *argv[]){
         if (next_particle_rank > particle_rank) {
 
             std::cout << "r(i, 0) + 0.5 = " << r(i, 0) + 0.5 << " " << "r(i+1, 0) + 0.5 = " << r(i+1, 0) + 0.5 << "\n";
-            std::cout << "particle_rank = " << particle_rank << " " << "next particle rank = " << next_particle_rank << "\n";
+            std::cout << "particle_rank = " << particle_rank << " " << "next_particle_rank = " << next_particle_rank << "\n";
+            std::cout << "i = " << i << " " << "i_start = " << i_start << " " << "i_end = " << i_end << "\n";
             std::cout<<" will be cut at " << i+1-i_start << "\n";
             slab_cut_indexes[counter] = i+1-i_start;
             counter++;
