@@ -259,7 +259,9 @@ int main(int argc, char *argv[]){
 
     std::cerr << "Loading " << N << " particles" << std::endl;
     blitz::Array<float, 2> r(blitz::Range(i_start, i_end - 1), blitz::Range(0, 2));
+    std::cout << "  r(blitz::Range(i_start, i_end - 1) successfull " << "\n"
     io.load(r);
+    std::cout << "  io.load(r) successfull " << "\n"
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
