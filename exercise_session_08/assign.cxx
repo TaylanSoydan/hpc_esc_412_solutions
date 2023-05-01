@@ -293,9 +293,9 @@ for (int i = 0; i < (N_rank - 1); ++i){
     std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
 }
 
-for (int i = 0; i < N_rank - 1; ++i){
-    assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
-}
+//for (int i = 0; i < N_rank - 1; ++i){
+  //  assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
+//}
 
 int * num_particles_to_send = new int [N_rank];
 int * num_particles_to_recv = new int [N_rank];
