@@ -277,11 +277,16 @@ int main(int argc, char *argv[]){
         int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
         //std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "s\n";
         if (next_particle_index > particle_index) {
-            std::cout << "cut_point = " <<i+1 << " " << "nGrid/N_rank = " << int(nGrid / N_rank) << "s\n";
+            //std::cout << "cut_point = " <<i+1 << " " << "nGrid/N_rank = " << int(nGrid / N_rank) << "s\n";
             //assert (counter < int(nGrid / N_rank));
             slab_cut_indexes[counter] = i+1;
             counter++;
         }    
+    std::cout<< "finished slab cut indexes" << "s\n";
+    for (int i = 0; i< N_rank - 1; ++i){
+        std::cout << "slab_cut_index_i = " << slab_cut_index[i] << "s\n";
+    }
+
 
     }
     for (int i = 0; i < N_rank - 1; ++i){
