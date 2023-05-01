@@ -240,7 +240,7 @@ int main(int argc, char *argv[]){
         if (current < N_rank - 1 && COMM_SLAB_START[current + 1] <= i) current++;
         SLAB2RANK[i] = current;
     }
-
+    std::cout << "SLAB2RANK[17] = " << SLAB2RANK[17] << "\n";
     auto start_time = std::chrono::high_resolution_clock::now();
 
     TipsyIO io;
