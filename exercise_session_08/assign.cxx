@@ -292,8 +292,8 @@ int main(int argc, char *argv[]){
             std::cout << "r(i, 0) + 0.5 = " << r(i, 0) + 0.5 << " " << "r(i+1, 0) + 0.5 = " << r(i+1, 0) + 0.5 << "\n";
             std::cout << "particle_rank = " << particle_rank << " " << "next_particle_rank = " << next_particle_rank << "\n";
             std::cout << "i = " << i << " " << "i_start = " << i_start << " " << "i_end = " << i_end << "\n";
-            std::cout<<" will be cut at " << i+1-i_start << "\n";
-            slab_cut_indexes[counter] = int((r(i+1, 0) + 0.5)*nGrid); //i+1-i_start;
+            std::cout<<" will be cut at " << next_particle_index << "\n";
+            slab_cut_indexes[counter] = next_particle_index; //i+1-i_start;
             counter++;
         }}
     std::cout<< "finished slab cut indexes" << "\n";
