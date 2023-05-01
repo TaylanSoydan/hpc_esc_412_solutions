@@ -309,7 +309,8 @@ int main(int argc, char *argv[]){
     int* num_particles_to_send = new int[N_rank];
     int* num_particles_to_recv = new int[N_rank];
     for (int i = 0; i < N_rank; ++i) {
-    num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+    //num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+    num_particles_to_send[i_rank] = slab_cut_indexes[i_rank+1] - slab_cut_indexes[i_rank];
     std::cout << "num_particles_to_send [i] = " << num_particles_to_send[i] << "\n";
     }
     int total_num_particles_to_send = 0;
