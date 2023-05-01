@@ -272,7 +272,7 @@ int main(int argc, char *argv[]){
 
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
 
-    for (int i = i_start; i < i_end; ++i){
+    for (int i = i_start; i < i_end-1; ++i){
         if (r(i, 0) > r(i+1,0)){
             std::cout << "r not sorted properly" << "\n";
         }
