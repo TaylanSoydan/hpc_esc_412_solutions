@@ -274,6 +274,7 @@ int main(int argc, char *argv[]){
         int particle_index = int(floor((r(i, 0) + 0.5))*nGrid);
         int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
         if (next_particle_index > particle_index) {
+            std::cout << "cut_point = " <<i+1 << " " << "nGrid/N_rank = " << int(nGrid / N_rank);
             assert (counter < int(nGrid / N_rank));
             slab_cut_indexes[counter] = i+1;
             counter++;
