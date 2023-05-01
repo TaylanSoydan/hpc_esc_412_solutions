@@ -263,15 +263,15 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    std::cout << "first particle before sort x = " << r(0,0) << "s\n";
+    std::cout << "first particle before sort x = " << r(0,0) << "\n";
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
-    std::cout << "first particle after sort x = " << r(0,0) << "s\n";
+    std::cout << "first particle after sort x = " << r(0,0) << "\n";
     
 
     int * slab_cut_indexes = new int [N_rank-1];
     int counter = 0;
     int particle_index;
-    std::cout<< "starting to find slab cut indexes" << "s\n";
+    std::cout<< "starting to find slab cut indexes" << "\n";
     for (int i = 0; i < N - 1; ++i){
         int particle_index = int(floor((r(i, 0) + 0.5))*nGrid);
         int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
@@ -281,10 +281,10 @@ int main(int argc, char *argv[]){
             //assert (counter < int(nGrid / N_rank));
             slab_cut_indexes[counter] = i+1;
             counter++;
-        }    
-    std::cout<< "finished slab cut indexes" << "s\n";
+        }}
+    std::cout<< "finished slab cut indexes" << "\n";
     for (int i = 0; i< N_rank - 1; ++i){
-        std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "s\n";
+        std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
     }
 
 
