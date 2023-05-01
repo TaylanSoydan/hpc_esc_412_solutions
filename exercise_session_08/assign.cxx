@@ -269,15 +269,9 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    for (int i = 0; i < 10; i++){
-        std::cout << "first 10 particles before sort x = " << r(i_start,0) << "\n";
-    }
-    
+
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
-    for (int i = 0; i < 10; i++){
-        std::cout << "first 10 particles after sort x = " << r(i_start,0) << "\n";
-    }
-    
+
 
 
 
@@ -299,7 +293,7 @@ int main(int argc, char *argv[]){
             std::cout << "particle_rank = " << particle_rank << " " << "next_particle_rank = " << next_particle_rank << "\n";
             std::cout << "i = " << i << " " << "i_start = " << i_start << " " << "i_end = " << i_end << "\n";
             std::cout<<" will be cut at " << i+1-i_start << "\n";
-            slab_cut_indexes[counter] = i+1-i_start;
+            slab_cut_indexes[counter] = int((r(i+1, 0) + 0.5)*nGrid); //i+1-i_start;
             counter++;
         }}
     std::cout<< "finished slab cut indexes" << "\n";
