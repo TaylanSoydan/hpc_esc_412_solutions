@@ -192,44 +192,7 @@ void project_grid(blitz::Array<float, 3> &grid, int nGrid, const char *out_filen
     f.close();
 }
 
-int main(int argc, char *argv[])
-{
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    int * slab_sizes = new int [N_rank];
-    int * slab_sizes_3 = new int [N_rank];
-    for (int i = 0; i < N_rank; ++i){
-         slab_sizes[i] = start_partit[i+1] - start_partit[i];
-         slab_sizes_3[i] = slab_sizes[i] * 3;
-    }
-    int * recvcounts = new int [N_rank];
-    MPI_Alltoall(slab_sizes.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
-    int sum_recvcounts = 0;
-    for (int i = 0; i < N_rank; ++i){
-        sum_recvcounts += recvcounts[i];
-    }
-    int * presum = new int [N_rank];
-    int * sum = new int [N_rank];
-
-    for (int i = 0; i < N_rank; ++i){
-       presum[i] = sum[i] + presum[i-1];
-    }
-    int * send_offset = new int [N_rank];
-    send_offset[0] = 0;
-    for (int i = 1; i < N_rank; ++i){
-        send_offset[i] = send_offset[i-1] + slab_sizes_3[i-1];
-    }
-    int * recv_offset = new int [N_rank];
-    recv_offset[0] = 0;
-    for (int i = 1; i < N_rank; ++i){
-        recv_offset[i] = recv_offset[i-1] + recvcounts[i-1];
-    }
-    float * particle_recv = new float [sum_recvcounts*3];
-    MPI_Alltoallv(r.data(), slab_sizes_3, send_offset, MPI_FLOAT,
-                    particle_recv, recvcounts, recv_offset, MPI_FLOAT,
-                    MPI_COMM_WORLD);
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+int main(int argc, char *argv[]){
     if (argc <= 1)
     {
         std::cerr << "Usage: " << argv[0] << " tipsyfile.std grid-size [order, projection-filename]"
