@@ -278,8 +278,8 @@ int counter = 0;
 int particle_index;
 std::cout<< "starting to find slab cut indexes" << "\n";
 for (int i = i_start; i < i_end; ++i){
-    int particle_index = int((r(i, 0) + 0.5))*nGrid;
-    int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
+    int particle_index = int(((r(i, 0) + 0.5))*nGrid);
+    int next_particle_index = int(((r(i+1, 0) + 0.5))*nGrid);
     std::cout << "particle_index = " << particle_index << " " << "next particle index = " << next_particle_index << "\n";
     std::cout << "cut_point = " << i+1-i_start << "r = "<< r(i, 0) << "int((r(i, 0) + 0.5)) = " <<int((r(i, 0) + 0.5))  << "ngrid = " << nGrid<< "\n";
     if (next_particle_index > particle_index) {
