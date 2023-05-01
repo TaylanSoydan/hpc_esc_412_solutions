@@ -200,6 +200,71 @@ int main(int argc, char *argv[])
     int i_rank, N_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &i_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &N_rank);
+    ptrdiff_t alloc_local, local0, start0,;
+    alloc_local = fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
+    assert (local0 > 0);
+    int* COMM_SLAB_SIZE = new int [N_rank];
+    int* COMM_SLAB_START = new int [N_rank];
+    MPI_Allgather(&start0, 1, MPI_INT, all_start0, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allgather(&local0, 1, MPI_INT, all_local0, 1, MPI_INT, MPI_COMM_WORLD);
+
+
+    float *data = new (std::align_val_t(64)) float[local0 * nGrid * nGrid]; //float[nGrid * nGrid * (nGrid + 2)];
+
+    qsort(r.data(), r.rows(), 3*sizeof(float),compare);
+
+    int * start_partit = new int [N_rank-1];
+    current = 0;
+    int particle_index;
+    for (int i = 0; i < N_rank; ++i){
+        int particle_index = int( floor((r(i, 0) + 0.5))*nGrid);
+        if (particle_index > current) particle_index ++;
+        start_partit[i] = current;
+
+    }
+    int * slab_sizes = new int [N_rank];
+    int * slab_sizes_3 = new int [N_rank];
+    for (int i = 0; i < N_rank; ++i){
+         slab_sizes[i] = start_partit[i+1] - start_partit[i];
+         slab_sizes_3[i] = slab_sizes[i] * 3;
+    }
+
+
+
+    int * recvcounts = new int [N_rank];
+
+    MPI_Alltoall(slab_sizes.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
+    int sum_recvcounts = 0;
+    for (int i = 0; i < N_rank; ++i){
+        sum_recvcounts += recvcounts[i];
+    }
+
+
+    int * presum = new int [N_rank];
+    int * sum = new int [N_rank];
+
+    for (int i = 0; i < N_rank; ++i){
+       presum[i] = sum[i] + presum[i-1];
+    }
+
+    int * send_offset = new int [N_rank];
+    send_offset[0] = 0;
+    for (int i = 1; i < N_rank; ++i){
+        send_offset[i] = send_offset[i-1] + slab_sizes_3[i-1];
+    }
+
+    int * recv_offset = new int [N_rank];
+    recv_offset[0] = 0;
+    for (int i = 1; i < N_rank; ++i){
+        recv_offset[i] = recv_offset[i-1] + recvcounts[i-1];
+    }
+
+
+    float * particle_recv = new float [sum_recvcounts*3];
+    MPI_Alltoallv(r.data(), slab_sizes_3, send_offset, MPI_FLOAT,
+                    particle_recv, recvcounts, recv_offset, MPI_FLOAT,
+                    MPI_COMM_WORLD);
+
 
     if (argc <= 1)
     {
@@ -246,10 +311,7 @@ int main(int argc, char *argv[])
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //int start0, local0; 
     //ptrdiff_t *local0, *start0;
-    ptrdiff_t local0, start0;
-
-    fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
-    float *data = new (std::align_val_t(64)) float[local0 * nGrid * nGrid]; //float[nGrid * nGrid * (nGrid + 2)];
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     blitz::Array<float, 3> grid_data(data, blitz::shape(local0, nGrid, nGrid), blitz::deleteDataWhenDone);
@@ -263,52 +325,52 @@ int main(int argc, char *argv[])
     start_time = std::chrono::high_resolution_clock::now();
     assign_mass(r, i_start, i_end, nGrid, grid, order);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    int all_start0[N_rank];
-    int all_local0[N_rank];
+    //int all_start0[N_rank];
+    //int all_local0[N_rank];
 
-    MPI_Allgather(&start0, 1, MPI_INT, all_start0, 1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Allgather(&local0, 1, MPI_INT, all_local0, 1, MPI_INT, MPI_COMM_WORLD);
-    int slab2rank[nGrid];
-    int slab = start0;
-    for (int i = 0; i < N_rank; i++) {
-        for (int j = 0; j < all_local0[i]; j++) {
-        slab2rank[slab] = i;
-        slab++;
-        }
-    }
-    qsort(r.data(), r.rows(), 3*sizeof(float),compare);
+    //MPI_Allgather(&start0, 1, MPI_INT, all_start0, 1, MPI_INT, MPI_COMM_WORLD);
+    //MPI_Allgather(&local0, 1, MPI_INT, all_local0, 1, MPI_INT, MPI_COMM_WORLD);
+    //int slab2rank[nGrid];
+    //int slab = start0;
+    //for (int i = 0; i < N_rank; i++) {
+    //    for (int j = 0; j < all_local0[i]; j++) {
+    //    slab2rank[slab] = i;
+    //    slab++;
+    //    }
+    //}
+    //qsort(r.data(), r.rows(), 3*sizeof(float),compare);
     // First, create the sendcounts array
     // Get the number of ranks
 
     // Compute the displacement arrays
-    blitz::Array<int, 1> sendcounts(N_rank);
-    sendcounts = 0;
-    for (int i = 0; i < N; i++) {
-        int slab = get_slab(r(i, 0)); // get slab for particle i
-        sendcounts(slab)++; // increment send count for that slab
-    }
+    //blitz::Array<int, 1> sendcounts(N_rank);
+    //sendcounts = 0;
+    //for (int i = 0; i < N; i++) {
+    //    int slab = get_slab(r(i, 0)); // get slab for particle i
+    //    sendcounts(slab)++; // increment send count for that slab
+    //}
 
-    blitz::Array<int, 1> recvcounts(N_rank);
-    MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
+    //blitz::Array<int, 1> recvcounts(N_rank);
+    //MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
 
-    int total_recv = blitz::sum(recvcounts);
+    //int total_recv = blitz::sum(recvcounts);
 
-    blitz::Array<float, 2> new_particles(total_recv, 3);
+    //blitz::Array<float, 2> new_particles(total_recv, 3);
 
-    blitz::Array<int, 1> senddispls(N_rank);
-    blitz::Array<int, 1> recvdispls(N_rank);
+    //blitz::Array<int, 1> senddispls(N_rank);
+    //blitz::Array<int, 1> recvdispls(N_rank);
 
-    senddispls(0) = 0;
-    recvdispls(0) = 0;
+    //senddispls(0) = 0;
+    //recvdispls(0) = 0;
 
-    for (int i = 1; i < N_rank; i++) {
-        senddispls(i) = senddispls(i-1) + sendcounts(i-1);
-        recvdispls(i) = recvdispls(i-1) + recvcounts(i-1);
-    }
+    //for (int i = 1; i < N_rank; i++) {
+    //    senddispls(i) = senddispls(i-1) + sendcounts(i-1);
+    //    recvdispls(i) = recvdispls(i-1) + recvcounts(i-1);
+    //}
 
-    MPI_Alltoallv(r.data(), sendcounts.data(), senddispls.data(), MPI_FLOAT,
-                    new_particles.data(), recvcounts.data(), recvdispls.data(), MPI_FLOAT,
-                    MPI_COMM_WORLD);
+    //MPI_Alltoallv(r.data(), sendcounts.data(), senddispls.data(), MPI_FLOAT,
+    //                new_particles.data(), recvcounts.data(), recvdispls.data(), MPI_FLOAT,
+    //                MPI_COMM_WORLD);
 
     // Copy the received particles to the sortedParticles array
     //std::memcpy(sortedParticles, new_particles.data(), total_recv * 3 * sizeof(float));
