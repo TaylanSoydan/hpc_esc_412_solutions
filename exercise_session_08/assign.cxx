@@ -270,12 +270,12 @@ int main(int argc, char *argv[]){
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     for (int i = 0; i < 10; i++){
-        std::cout << "first 10 particles before sort x = " << r(i,0) << "\n";
+        std::cout << "first 10 particles before sort x = " << r(i_start,0) << "\n";
     }
     
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
     for (int i = 0; i < 10; i++){
-        std::cout << "first 10 particles after sort x = " << r(i,0) << "\n";
+        std::cout << "first 10 particles after sort x = " << r(i_start,0) << "\n";
     }
     
 
