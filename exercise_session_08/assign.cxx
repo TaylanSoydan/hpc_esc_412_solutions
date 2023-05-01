@@ -194,78 +194,42 @@ void project_grid(blitz::Array<float, 3> &grid, int nGrid, const char *out_filen
 
 int main(int argc, char *argv[])
 {
-    int provided;
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int i_rank, N_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &i_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &N_rank);
-    ptrdiff_t alloc_local, local0, start0,;
-    alloc_local = fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
-    assert (local0 > 0);
-    int* COMM_SLAB_SIZE = new int [N_rank];
-    int* COMM_SLAB_START = new int [N_rank];
-    MPI_Allgather(&start0, 1, MPI_INT, all_start0, 1, MPI_INT, MPI_COMM_WORLD);
-    MPI_Allgather(&local0, 1, MPI_INT, all_local0, 1, MPI_INT, MPI_COMM_WORLD);
-
-
-    float *data = new (std::align_val_t(64)) float[local0 * nGrid * nGrid]; //float[nGrid * nGrid * (nGrid + 2)];
-
-    qsort(r.data(), r.rows(), 3*sizeof(float),compare);
-
-    int * start_partit = new int [N_rank-1];
-    current = 0;
-    int particle_index;
-    for (int i = 0; i < N_rank; ++i){
-        int particle_index = int( floor((r(i, 0) + 0.5))*nGrid);
-        if (particle_index > current) particle_index ++;
-        start_partit[i] = current;
-
-    }
     int * slab_sizes = new int [N_rank];
     int * slab_sizes_3 = new int [N_rank];
     for (int i = 0; i < N_rank; ++i){
          slab_sizes[i] = start_partit[i+1] - start_partit[i];
          slab_sizes_3[i] = slab_sizes[i] * 3;
     }
-
-
-
     int * recvcounts = new int [N_rank];
-
     MPI_Alltoall(slab_sizes.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
     int sum_recvcounts = 0;
     for (int i = 0; i < N_rank; ++i){
         sum_recvcounts += recvcounts[i];
     }
-
-
     int * presum = new int [N_rank];
     int * sum = new int [N_rank];
 
     for (int i = 0; i < N_rank; ++i){
        presum[i] = sum[i] + presum[i-1];
     }
-
     int * send_offset = new int [N_rank];
     send_offset[0] = 0;
     for (int i = 1; i < N_rank; ++i){
         send_offset[i] = send_offset[i-1] + slab_sizes_3[i-1];
     }
-
     int * recv_offset = new int [N_rank];
     recv_offset[0] = 0;
     for (int i = 1; i < N_rank; ++i){
         recv_offset[i] = recv_offset[i-1] + recvcounts[i-1];
     }
-
-
     float * particle_recv = new float [sum_recvcounts*3];
     MPI_Alltoallv(r.data(), slab_sizes_3, send_offset, MPI_FLOAT,
                     particle_recv, recvcounts, recv_offset, MPI_FLOAT,
                     MPI_COMM_WORLD);
 
-
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if (argc <= 1)
     {
         std::cerr << "Usage: " << argv[0] << " tipsyfile.std grid-size [order, projection-filename]"
@@ -286,6 +250,33 @@ int main(int argc, char *argv[])
     }
 
     const char *out_filename = (argc > 4) ? argv[4] : "projected.csv";
+
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+
+    int i_rank, N_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &i_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &N_rank);
+
+    ptrdiff_t alloc_local, local0, start0;
+    alloc_local = fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
+    assert (local0 > 0);
+
+
+    int* COMM_SLAB_SIZE = new int [N_rank];
+    int* COMM_SLAB_START = new int [N_rank];
+    int* SLAB2RANK = new int[nGrid];
+    MPI_Allgather(&start0, 1, MPI_INT, COMM_SLAB_START, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allgather(&local0, 1, MPI_INT, COMM_SLAB_SIZE, 1, MPI_INT, MPI_COMM_WORLD);
+
+
+    
+
+    int current = 0;
+    for (int i = 0; i < nGrid; ++i) {
+        if (current < N_rank - 1 && COMM_SLAB_START[current + 1] <= i) current++;
+        SLAB2RANK[i] = current;
+    }
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -309,76 +300,85 @@ int main(int argc, char *argv[])
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //int start0, local0; 
-    //ptrdiff_t *local0, *start0;
+
+    qsort(r.data(), r.rows(), 3*sizeof(float),compare);
     
+
+    int * slab_cut_indexes = new int [N_rank-1];
+    int counter = 0;
+    int particle_index;
+    for (int i = 0; i < N - 1; ++i){
+        int particle_index = int(floor((r(i, 0) + 0.5))*nGrid);
+        int next_particle_index = int(floor((r(i+1, 0) + 0.5))*nGrid);
+        if (next_particle_index > particle_index) {
+            assert (counter < int(nGrid / N_rank));
+            slab_cut_indexes[counter] = i+1;
+            counter++;
+        }    
+
+    }
+    for (int i = 0; i < N_rank - 1; ++i){
+        assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
+    }
+
+    int * num_particles_to_send = new int [N_rank];
+    int * num_particles_to_recv = new int [N_rank];
+    for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+    int total_num_particles_to_send = 0;
+    for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
+    assert (total_num_particles_to_send == (i_end - i_start));
+    
+    MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
+
+    int total_num_particles_to_recv = 0;
+    for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
+    
+    int sum_check;
+    MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    assert (sum_check == N);
+
+    int* MPISendCount = new int [N_rank];
+    int* MPIRecvCount = new int [N_rank];
+    for (int i = 0; i < N_rank; ++i) {
+        MPISendCount[i] = (num_particles_to_send[i] * 3);
+        MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
+    }
+
+    int* MPISendOffset = new int [N_rank];
+    MPISendOffset[0] = 0;
+    for (int i = 1; i < N_rank; ++i) MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
+    int* MPIRecvOffset = new int [N_rank];
+    MPIRecvOffset[0] = 0;
+    for (int i = 1; i < N_rank; ++i) MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
+
+
+    MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r.data(),MPIRecvCount,MPIRecvOffset,MPI_FLOAT,MPI_COMM_WORLD);
+    delete [] MPISendCount;
+    delete [] MPISendOffset;
+    delete [] MPIRecvCount;
+    delete [] MPIRecvOffset;
+    delete [] num_particles_to_send;
+    delete [] num_particles_to_recv;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    blitz::Array<float, 3> grid_data(data, blitz::shape(local0, nGrid, nGrid), blitz::deleteDataWhenDone);
+    float *data = new (std::align_val_t(64)) float[local0 * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
+    blitz::Array<float, 3> grid_data(data, blitz::shape(local0, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
     grid_data = 0.0;
-    blitz::Range new_range(start0, local0 + start0);
-    blitz::Array<float, 3> grid = grid_data(new_range, blitz::Range::all(), blitz::Range(0, nGrid - 1));
+    //blitz::Range new_range(start0, local0 + start0);
+    blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+    grid = 0.0;
     //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
-    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(nGrid, nGrid, nGrid / 2 + 1));
+    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(local0, nGrid, nGrid / 2 + 1));
 
     start_time = std::chrono::high_resolution_clock::now();
     assign_mass(r, i_start, i_end, nGrid, grid, order);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //int all_start0[N_rank];
-    //int all_local0[N_rank];
-
-    //MPI_Allgather(&start0, 1, MPI_INT, all_start0, 1, MPI_INT, MPI_COMM_WORLD);
-    //MPI_Allgather(&local0, 1, MPI_INT, all_local0, 1, MPI_INT, MPI_COMM_WORLD);
-    //int slab2rank[nGrid];
-    //int slab = start0;
-    //for (int i = 0; i < N_rank; i++) {
-    //    for (int j = 0; j < all_local0[i]; j++) {
-    //    slab2rank[slab] = i;
-    //    slab++;
-    //    }
-    //}
-    //qsort(r.data(), r.rows(), 3*sizeof(float),compare);
-    // First, create the sendcounts array
-    // Get the number of ranks
-
-    // Compute the displacement arrays
-    //blitz::Array<int, 1> sendcounts(N_rank);
-    //sendcounts = 0;
-    //for (int i = 0; i < N; i++) {
-    //    int slab = get_slab(r(i, 0)); // get slab for particle i
-    //    sendcounts(slab)++; // increment send count for that slab
-    //}
-
-    //blitz::Array<int, 1> recvcounts(N_rank);
-    //MPI_Alltoall(sendcounts.data(), 1, MPI_INT, recvcounts.data(), 1, MPI_INT, MPI_COMM_WORLD);
-
-    //int total_recv = blitz::sum(recvcounts);
-
-    //blitz::Array<float, 2> new_particles(total_recv, 3);
-
-    //blitz::Array<int, 1> senddispls(N_rank);
-    //blitz::Array<int, 1> recvdispls(N_rank);
-
-    //senddispls(0) = 0;
-    //recvdispls(0) = 0;
-
-    //for (int i = 1; i < N_rank; i++) {
-    //    senddispls(i) = senddispls(i-1) + sendcounts(i-1);
-    //    recvdispls(i) = recvdispls(i-1) + recvcounts(i-1);
-    //}
 
     //MPI_Alltoallv(r.data(), sendcounts.data(), senddispls.data(), MPI_FLOAT,
     //                new_particles.data(), recvcounts.data(), recvdispls.data(), MPI_FLOAT,
     //                MPI_COMM_WORLD);
-
-    // Copy the received particles to the sortedParticles array
-    //std::memcpy(sortedParticles, new_particles.data(), total_recv * 3 * sizeof(float));
-
-
-
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
