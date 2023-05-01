@@ -305,39 +305,40 @@ int * num_particles_to_recv = new int [N_rank];
 for (int i = 0; i < N_rank; ++i) num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
 int total_num_particles_to_send = 0;
 for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
-assert (total_num_particles_to_send == (i_end - i_start));
+std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << "\n";
+//    assert (total_num_particles_to_send == (i_end - i_start));
 
-MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
+//    MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
 
-int total_num_particles_to_recv = 0;
-for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
+//    int total_num_particles_to_recv = 0;
+//    for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
 
-int sum_check;
-MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-assert (sum_check == N);
+//    int sum_check;
+//    MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+//    assert (sum_check == N);
 
-int* MPISendCount = new int [N_rank];
-int* MPIRecvCount = new int [N_rank];
-for (int i = 0; i < N_rank; ++i) {
-    MPISendCount[i] = (num_particles_to_send[i] * 3);
-    MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
-}
+//    int* MPISendCount = new int [N_rank];
+//    int* MPIRecvCount = new int [N_rank];
+//    for (int i = 0; i < N_rank; ++i) {
+//        MPISendCount[i] = (num_particles_to_send[i] * 3);
+//        MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
+//    }
 
-int* MPISendOffset = new int [N_rank];
-MPISendOffset[0] = 0;
-for (int i = 1; i < N_rank; ++i) MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
-int* MPIRecvOffset = new int [N_rank];
-MPIRecvOffset[0] = 0;
-for (int i = 1; i < N_rank; ++i) MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
+//    int* MPISendOffset = new int [N_rank];
+//    MPISendOffset[0] = 0;
+//    for (int i = 1; i < N_rank; ++i) MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
+//    int* MPIRecvOffset = new int [N_rank];
+//    MPIRecvOffset[0] = 0;
+//    for (int i = 1; i < N_rank; ++i) MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
 
 
-MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r.data(),MPIRecvCount,MPIRecvOffset,MPI_FLOAT,MPI_COMM_WORLD);
-delete [] MPISendCount;
-delete [] MPISendOffset;
-delete [] MPIRecvCount;
-delete [] MPIRecvOffset;
-delete [] num_particles_to_send;
-delete [] num_particles_to_recv;
+//    MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r.data(),MPIRecvCount,MPIRecvOffset,MPI_FLOAT,MPI_COMM_WORLD);
+//    delete [] MPISendCount;
+//    delete [] MPISendOffset;
+//    delete [] MPIRecvCount;
+//    delete [] MPIRecvOffset;
+//    delete [] num_particles_to_send;
+//    delete [] num_particles_to_recv;
 
 //    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
