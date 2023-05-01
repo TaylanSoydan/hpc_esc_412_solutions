@@ -310,8 +310,8 @@ std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << 
 
 MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
 
-int total_num_particles_to_recv = 0;
-for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
+//int total_num_particles_to_recv = 0;
+//for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
 
 //    int sum_check;
 //    MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
