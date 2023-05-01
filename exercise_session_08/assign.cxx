@@ -269,9 +269,14 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //std::cout << "first particle before sort x = " << r(i_start,0) << "\n";
+    for (int i = 0; i < 10; i++){
+        std::cout << "first 10 particles before sort x = " << r(i,0) << "\n";
+    }
+    
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
-    //std::cout << "first particle after sort x = " << r(i_start,0) << "\n";
+    for (int i = 0; i < 10; i++){
+        std::cout << "first 10 particles after sort x = " << r(i,0) << "\n";
+    }
     
 
 
