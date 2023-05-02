@@ -365,6 +365,7 @@ int main(int argc, char *argv[]){
     blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
 //    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     int new_dim = local0 + order - 1;
+    std::cout << "new_dim = " << new_dim << "\n";
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
     grid_data = 0.0;
@@ -376,41 +377,9 @@ int main(int argc, char *argv[]){
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
     start_time = std::chrono::high_resolution_clock::now();
-    //assign_mass(r_sorted, i_start, i_end, nGrid, grid, order);
     std::cout << "Assigning mass to the grid using order " << order << std::endl;
-    //void assign_mass(blitz::Array<float, 2> &r, int part_i_start, int part_i_end, int nGrid, blitz::Array<float, 3> &grid, int order = 4)
-    #pragma omp parallel for
-        for (int pn = 0; pn < total_num_particles_to_recv; ++pn)
-        {
-            float x = rsorted(pn, 0);
-            float y = rsorted(pn, 1);
-            float z = rsorted(pn, 2);
-
-            float rx = (x + 0.5) * nGrid;
-            float ry = (y + 0.5) * nGrid;
-            float rz = (z + 0.5) * nGrid;
-
-            // precalculate Wx, Wy, Wz and return start index
-            float Wx[order], Wy[order], Wz[order];
-            int i_start = precalculate_W(Wx, order, rx);
-            int j_start = precalculate_W(Wy, order, ry);
-            int k_start = precalculate_W(Wz, order, rz);
-
-            for (int i = i_start; i < i_start + order; i++)
-            {
-                for (int j = j_start; j < j_start + order; j++)
-                {
-                    for (int k = k_start; k < k_start + order; k++)
-                    {
-                        float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
-
-    // Deposit the mass onto grid(i,j,k)
-    #pragma omp atomic
-                        grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res;
-                    }
-                }
-            }
-        }
+    //assign_mass(r_sorted, i_start, i_end, nGrid, grid, order);
+    
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
