@@ -324,13 +324,12 @@ int main(int argc, char *argv[]){
     int total_num_particles_to_send = 0;
     for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
     std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << "\n";
-//    assert (total_num_particles_to_send == (i_end - i_start));
 
-//MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
 
-//int total_num_particles_to_recv = 0;
-//for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
-
+    int total_num_particles_to_recv = 0;
+    for (int i = 0; i < N_rank; ++i) total_num_particles_to_recv += num_particles_to_recv[i];
+    std::cout << "total_num_particles_to_recv = " << total_num_particles_to_recv << "\n";
 //    int sum_check;
 //    MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 //    assert (sum_check == N);
