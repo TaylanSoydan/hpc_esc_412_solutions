@@ -378,7 +378,7 @@ int main(int argc, char *argv[]){
 
     start_time = std::chrono::high_resolution_clock::now();
     std::cout << "Assigning mass to the grid using order " << order << std::endl;
-    //assign_mass(r_sorted, i_start, i_end, nGrid, grid, order);
+    assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
