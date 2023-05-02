@@ -362,18 +362,18 @@ int main(int argc, char *argv[]){
     delete [] MPIRecvOffset;
     delete [] num_particles_to_send;
     delete [] num_particles_to_recv;
-
+    blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
 //    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    float *data = new (std::align_val_t(64)) float[local0 * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
-    blitz::Array<float, 3> grid_data(data, blitz::shape(local0, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
+    int new_dim = local0 + order - 1;
+    float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
+    blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
     grid_data = 0.0;
-    //blitz::Range new_range(start0, local0 + start0);
+    //blitz::Range new_range(start0, new_dim + start0);
     blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     grid = 0.0;
     //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
-    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(local0, nGrid, nGrid / 2 + 1));
+    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
     start_time = std::chrono::high_resolution_clock::now();
     //assign_mass(r_sorted, i_start, i_end, nGrid, grid, order);
@@ -382,9 +382,9 @@ int main(int argc, char *argv[]){
     #pragma omp parallel for
         for (int pn = 0; pn < total_num_particles_to_recv; ++pn)
         {
-            float x = r_sorted(pn, 0);
-            float y = r_sorted(pn, 1);
-            float z = r_sorted(pn, 2);
+            float x = rsorted(pn, 0);
+            float y = rsorted(pn, 1);
+            float z = rsorted(pn, 2);
 
             float rx = (x + 0.5) * nGrid;
             float ry = (y + 0.5) * nGrid;
