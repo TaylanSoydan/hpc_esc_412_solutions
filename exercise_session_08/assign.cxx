@@ -387,7 +387,7 @@ int main(int argc, char *argv[]){
     std::cout << "i_rank = " << i_rank << " upperboundary = " << upperboundary << "\n";
 
     #pragma omp parallel for
-    for (int pn = i_start; pn < i_start + total_num_particles_to_recv-1 ; ++pn)
+    for (int pn = i_start; pn < i_start + total_num_particles_to_recv ; ++pn)
     {
         float x = r(pn, 0);
         float y = r(pn, 1);
