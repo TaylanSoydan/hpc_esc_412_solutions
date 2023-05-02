@@ -407,14 +407,13 @@ int main(int argc, char *argv[]){
                 {
                     float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
 
-// Deposit the mass onto grid(i,j,k)
-#pragma omp atomic
-                    grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res;
+    // Deposit the mass onto grid(i,j,k)
+    #pragma omp atomic
+                        grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res;
+                    }
                 }
             }
         }
-    }
-}
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
