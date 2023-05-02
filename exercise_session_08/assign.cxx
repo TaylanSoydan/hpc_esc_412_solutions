@@ -373,7 +373,10 @@ int main(int argc, char *argv[]){
 
     start_time = std::chrono::high_resolution_clock::now();
     std::cout << "Assigning mass to the grid using order " << order << std::endl;
-    assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
+    for (int i = 0; i < 10; ++i) {
+        std::cout << "particle i = " << rsorted(i,0);
+    }
+    //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
     
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
