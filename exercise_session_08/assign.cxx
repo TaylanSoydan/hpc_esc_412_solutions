@@ -449,9 +449,9 @@ int main(int argc, char *argv[]){
 //        project_grid(grid, nGrid, out_filename);
 
 //        // Convert to overdensity
-//        float grid_sum = sum(grid);
-//        float mean_density = grid_sum / (nGrid * nGrid * nGrid);
-//        grid = (grid - mean_density) / mean_density;
+    float grid_sum = sum(grid);
+    float mean_density = grid_sum / (nGrid * nGrid * nGrid);
+    grid = (grid - mean_density) / mean_density;
 
 //        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
 //        fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
