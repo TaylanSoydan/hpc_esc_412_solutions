@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-FILENAME = 'log_binning'
+FILENAME = 'variable_binning'
 
 
 def log(x):
