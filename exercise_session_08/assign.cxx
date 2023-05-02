@@ -426,20 +426,20 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
 
-//    if (i_rank == 0)
-//    {
-//        MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-//    }
-//    else
-//    {
-//        MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-//    }
+    if (i_rank == 0)
+    {
+        MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
 
-//    if (i_rank == 0)
-//    {
-//        // Simple test
-//        std::cout << "Sum of all grid mass = " << blitz::sum(grid) << std::endl;
-
+    if (i_rank == 0)
+    {
+        // Simple test
+        std::cout << "Sum of all grid mass = " << blitz::sum(grid) << std::endl;
+    }
 //        project_grid(grid, nGrid, out_filename);
 
 //        // Convert to overdensity
