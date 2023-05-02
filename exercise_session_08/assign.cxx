@@ -426,6 +426,12 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
     std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
 
+
+        // Simple test
+    std::cout << "For rank = " << i_rank << " sum of mass = " << blitz::sum(grid) << std::endl;
+
+
+
     if (i_rank == 0)
     {
         MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
