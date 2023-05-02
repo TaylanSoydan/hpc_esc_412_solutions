@@ -135,7 +135,7 @@ void assign_mass(blitz::Array<float, 2> &r, int part_i_start, int part_i_end, in
         float rx = (x + 0.5) * nGrid;
         float ry = (y + 0.5) * nGrid;
         float rz = (z + 0.5) * nGrid;
-
+        x -= COMM_SLAB_START[i_rank];
         // precalculate Wx, Wy, Wz and return start index
         float Wx[order], Wy[order], Wz[order];
         int i_start = precalculate_W(Wx, order, rx);
@@ -377,32 +377,8 @@ int main(int argc, char *argv[]){
     //    std::cout << "particle i = " << rsorted(i,0);
     //}
     //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
-    grid = 0;
-    float grid_step = 100;
-    #pragma omp parallel for
-    for(int pn=0; pn<10; ++pn) {
-	float x = rsorted(pn,0);
-	float y = rsorted(pn,1);
-	float z = rsorted(pn,2);
-	
-	x+=0.5;
-	y+=0.5;
-	z+=0.5;
 
-	int i = (int) floor(x * grid_step);
-	int j = (int) floor(y * grid_step);
-	int k = (int) floor(z * grid_step);
 
-	// Convert x, y and z into a grid position i,j,k such that
-	// 0 <= i < nGrid
-	// 0 <= j < nGrid
-	// 0 <= k < nGrid
-    #pragma omp atomic
-	grid(i,j,k)+=1;
-	// Deposit the mass onto grid(i,j,k)
-	//
-	
-    }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
