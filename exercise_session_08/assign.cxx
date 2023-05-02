@@ -375,17 +375,14 @@ int main(int argc, char *argv[]){
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(local0, nGrid, nGrid / 2 + 1));
 
-//    start_time = std::chrono::high_resolution_clock::now();
-//    assign_mass(r, i_start, i_end, nGrid, grid, order);
-//    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    start_time = std::chrono::high_resolution_clock::now();
+    assign_mass(r, i_start, i_end, nGrid, grid, order);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//    //MPI_Alltoallv(r.data(), sendcounts.data(), senddispls.data(), MPI_FLOAT,
-//    //                new_particles.data(), recvcounts.data(), recvdispls.data(), MPI_FLOAT,
-//    //                MPI_COMM_WORLD);
 
-//    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
-//    std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
+    std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
 
 //    if (i_rank == 0)
 //    {
