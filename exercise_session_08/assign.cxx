@@ -354,8 +354,8 @@ int main(int argc, char *argv[]){
         std::cout << "MPIRecvOffset [i] = " << MPIRecvOffset[i] << "\n";
     }
     
-
-    MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r.data(),MPIRecvCount,MPIRecvOffset,MPI_FLOAT,MPI_COMM_WORLD);
+    int* r_sorted = new int [total_num_particles_to_recv * 3]
+    MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r_sorted, MPIRecvCount, MPIRecvOffset, MPI_FLOAT, MPI_COMM_WORLD);
     delete [] MPISendCount;
     delete [] MPISendOffset;
     delete [] MPIRecvCount;
