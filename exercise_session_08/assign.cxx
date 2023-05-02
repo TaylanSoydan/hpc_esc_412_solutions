@@ -279,7 +279,8 @@ int main(int argc, char *argv[]){
     }
     
 
-    int * slab_cut_indexes = new int [N_rank-1];
+    int * slab_cut_indexes = new int [N_rank];
+    slab_cut_indexes[N_rank - 1] = i_end - i_start;
     int counter = 0;
     int particle_slab;
     std::cout<< "starting to find slab cut indexes" << "\n";
@@ -311,9 +312,11 @@ int main(int argc, char *argv[]){
 //}
 
     int* num_particles_to_send = new int[N_rank];
+    num_particles_to_send[0] = slab_cut_indexes[0];
+
     int* num_particles_to_recv = new int[N_rank];
-    for (int i = 0; i < N_rank; ++i) {
-    num_particles_to_send[i] = slab_cut_indexes[i+1] - slab_cut_indexes[i];
+    for (int i = 1; i < N_rank; ++i) {
+    num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];
     std::cout << "num_particles_to_send [i] = " << num_particles_to_send[i] << "\n";
     }
     int total_num_particles_to_send = 0;
