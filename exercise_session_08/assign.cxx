@@ -456,11 +456,11 @@ int main(int argc, char *argv[]){
 //        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
     fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
 //        
-//        std::cout << "Plan created" << std::endl;
-//        fftwf_execute(plan);
-//        std::cout << "Plan executed" << std::endl;
-//        fftwf_destroy_plan(plan);
-//        std::cout << "Plan destroyed" << std::endl;
+    std::cout << "Plan created" << std::endl;
+    fftwf_execute(plan);
+    std::cout << "Plan executed" << std::endl;
+    fftwf_destroy_plan(plan);
+    std::cout << "Plan destroyed" << std::endl;
 //        // Linear binning is 1
 //        // Variable binning is 2
 //        // Log binning is 3
