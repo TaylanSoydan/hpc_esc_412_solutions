@@ -495,8 +495,24 @@ int main(int argc, char *argv[]){
         }
     }
 
-    MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (i_rank == 0)
+    {
+        MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
+        if (i_rank == 0)
+    {
+        MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        MPI_Reduce(nPower.data(), nullptr, nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
 
     save_binning(binning, fPower, nPower);
 //        const int binning = 2;
