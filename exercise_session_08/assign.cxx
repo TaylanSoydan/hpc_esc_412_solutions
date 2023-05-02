@@ -135,7 +135,6 @@ void assign_mass(blitz::Array<float, 2> &r, int part_i_start, int part_i_end, in
         float rx = (x + 0.5) * nGrid;
         float ry = (y + 0.5) * nGrid;
         float rz = (z + 0.5) * nGrid;
-        x -= COMM_SLAB_START[i_rank];
         // precalculate Wx, Wy, Wz and return start index
         float Wx[order], Wy[order], Wz[order];
         int i_start = precalculate_W(Wx, order, rx);
@@ -377,8 +376,45 @@ int main(int argc, char *argv[]){
     //    std::cout << "particle i = " << rsorted(i,0);
     //}
     //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
+    int upperbound = (i_rank == N_rank - 1) ? nGrid : COMM_SLAB_START[i_rank+1];
+    float upperboundary = 1.0 / nGrid * upperbound;
+    printf("i am rank %d, upperboundary%f\n",i_rank,upperboundary);
 
+    #pragma omp parallel for
+    for (int pn = i_start; pn < i_end; ++pn)
+    {
+        float x = r(pn, 0);
+        float y = r(pn, 1);
+        float z = r(pn, 2);
 
+        float rx = (x + 0.5) * nGrid;
+        float ry = (y + 0.5) * nGrid;
+        float rz = (z + 0.5) * nGrid;
+
+        rx = rx - COMM_SLAB_START[i_rank];
+
+        // precalculate Wx, Wy, Wz and return start index
+        float Wx[order], Wy[order], Wz[order];
+        int i_start = precalculate_W(Wx, order, rx);
+        int j_start = precalculate_W(Wy, order, ry);
+        int k_start = precalculate_W(Wz, order, rz);
+
+        for (int i = i_start; i < i_start + order; i++)
+        {
+            for (int j = j_start; j < j_start + order; j++)
+            {
+                for (int k = k_start; k < k_start + order; k++)
+                {
+                    float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
+
+// Deposit the mass onto grid(i,j,k)
+#pragma omp atomic
+                    grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res;
+                }
+            }
+        }
+    }
+}
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
