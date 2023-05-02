@@ -514,55 +514,11 @@ int main(int argc, char *argv[]){
         MPI_Reduce(nPower.data(), nullptr, nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     }
 
-    save_binning(binning, fPower, nPower);
-//        const int binning = 2;
-
-//        int n_bins = 80;
-//        if (binning == 1)
-//        {
-//            n_bins = nGrid;
-//        }
-//        std::vector<float> fPower_local(n_bins, 0.0);
-//        std::vector<int> nPower_local(n_bins, 0);
-//        float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
-
-//        // Determine the start and end index of kx values for each rank
-//        int kx_start = i_rank * nGrid / N_rank;
-//        int kx_end = (i_rank + 1) * nGrid / N_rank;
-
-//        // loop over δ(k) and compute k from kx, ky and kz for the current rank
-//        for (int i = kx_start; i < kx_end; i++)
-//        {
-//            int kx = k_indx(i, nGrid);
-//            for (int j = 0; j < nGrid; j++)
-//            {
-//                int ky = k_indx(j, nGrid);
-//                for (int l = 0; l < nGrid / 2 + 1; l++)
-//                {
-//                    int kz = l;
-
-//                    float k = sqrt(kx * kx + ky * ky + kz * kz);
-//                    int i_bin = get_i_bin(k, n_bins, nGrid, binning);
-//                    if (i_bin == fPower_local.size())
-//                        i_bin--;
-//                    fPower_local[i_bin] += std::norm(kdata(i, j, l));
-//                    nPower_local[i_bin] += 1;
-//                }
-//            }
-//        }
-
-//        // Reduce the binned values from all ranks to compute the final P(k) values
-//        std::vector<float> fPower(n_bins, 0.0);
-//        std::vector<int> nPower(n_bins, 0);
-//        MPI_Reduce(fPower_local.data(), fPower.data(), n_bins, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-//        MPI_Reduce(nPower_local.data(), nPower.data(), n_bins, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-
-//        if (i_rank == 0)
-//        {
-//            save_binning(binning, fPower, nPower);
-//        }}
-
-
+    if (i_rank == 0)
+    {
+        save_binning(binning, fPower, nPower);
+    }
+    
 
 MPI_Finalize();
 }
