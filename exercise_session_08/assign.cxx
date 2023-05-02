@@ -380,7 +380,7 @@ int main(int argc, char *argv[]){
     grid = 0;
     float grid_step = 100;
     #pragma omp parallel for
-    for(int pn=0; pn<100000; ++pn) {
+    for(int pn=0; pn<10; ++pn) {
 	float x = rsorted(pn,0);
 	float y = rsorted(pn,1);
 	float z = rsorted(pn,2);
