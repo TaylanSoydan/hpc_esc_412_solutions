@@ -376,7 +376,7 @@ int main(int argc, char *argv[]){
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(local0, nGrid, nGrid / 2 + 1));
 
     start_time = std::chrono::high_resolution_clock::now();
-    assign_mass(r, i_start, i_end, nGrid, grid, order);
+    assign_mass(r_sorted, i_start, i_end, nGrid, grid, order);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
