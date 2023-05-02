@@ -367,17 +367,42 @@ int main(int argc, char *argv[]){
     blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
     grid_data = 0.0;
     blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-    //grid = 0.0;
+    grid = 0.0;
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
     start_time = std::chrono::high_resolution_clock::now();
     std::cout << "Assigning mass to the grid using order " << order << std::endl;
-    for (int i = 0; i < 10; ++i) {
-        std::cout << "particle i = " << rsorted(i,0);
-    }
+    //for (int i = 0; i < 10; ++i) {
+    //    std::cout << "particle i = " << rsorted(i,0);
+    //}
     //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
-    
+    grid = 0;
+    float grid_step = 100;
+    #pragma omp parallel for
+    for(int pn=0; pn<N; ++pn) {
+	float x = rsorted(pn,0);
+	float y = rsorted(pn,1);
+	float z = rsorted(pn,2);
+	
+	x+=0.5;
+	y+=0.5;
+	z+=0.5;
+
+	int i = (int) floor(x * grid_step);
+	int j = (int) floor(y * grid_step);
+	int k = (int) floor(z * grid_step);
+
+	// Convert x, y and z into a grid position i,j,k such that
+	// 0 <= i < nGrid
+	// 0 <= j < nGrid
+	// 0 <= k < nGrid
+    #pragma omp atomic
+	grid(i,j,k)+=1;
+	// Deposit the mass onto grid(i,j,k)
+	//
+	
+    }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
