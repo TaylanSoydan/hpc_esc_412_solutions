@@ -332,9 +332,6 @@ int main(int argc, char *argv[]){
         total_num_particles_to_recv += num_particles_to_recv[i];
     }
     std::cout << "total_num_particles_to_recv = " << total_num_particles_to_recv << "\n";
-//    int sum_check;
-//    MPI_Allreduce(&total_num_particles_to_recv, &sum_check, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-//    assert (sum_check == N);
 
     int* MPISendCount = new int [N_rank];
     int* MPIRecvCount = new int [N_rank];
@@ -363,13 +360,12 @@ int main(int argc, char *argv[]){
     delete [] num_particles_to_send;
     delete [] num_particles_to_recv;
     blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
-//    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     int new_dim = local0 + order - 1;
     std::cout << "new_dim = " << new_dim << "\n";
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
     grid_data = 0.0;
-    //blitz::Range new_range(start0, new_dim + start0);
     blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     //grid = 0.0;
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
