@@ -367,15 +367,15 @@ int main(int argc, char *argv[]){
         float y = rsorted(pn, 1);
         float z = rsorted(pn, 2);
 
-        //float rx = (x + 0.5) * nGrid; //std::ceil(upperboundary)
-        //float ry = (y + 0.5) * nGrid;
-        //float rz = (z + 0.5) * nGrid;
+        float rx = (x + 0.5) * nGrid;
+        float ry = (y + 0.5) * nGrid;
+        float rz = (z + 0.5) * nGrid;
 
         //// precalculate Wx, Wy, Wz and return start index
-        //float Wx[order], Wy[order], Wz[order];
-        //int i_start = precalculate_W(Wx, order, rx);
-        //int j_start = precalculate_W(Wy, order, ry);
-        //int k_start = precalculate_W(Wz, order, rz);
+        float Wx[order], Wy[order], Wz[order];
+        int i_start = precalculate_W(Wx, order, rx);
+        int j_start = precalculate_W(Wy, order, ry);
+        int k_start = precalculate_W(Wz, order, rz);
 
         //for (int i = i_start; i < i_start + order; i++)
         //{
