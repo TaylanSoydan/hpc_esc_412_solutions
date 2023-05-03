@@ -220,7 +220,7 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &N_rank);
 
     ptrdiff_t alloc_local, local0, start0;
-    fftw_mpi_init()ssh e
+    fftw_mpi_init();
     alloc_local = fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
     assert (local0 > 0);
     printf("local0 = %ld start0 = %ld \n", local0, start0);
