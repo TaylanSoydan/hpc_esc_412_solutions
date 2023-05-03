@@ -340,7 +340,7 @@ int main(int argc, char *argv[]){
     printf("End indices of r: (%d, %d)\n", r.ubound(0), r.ubound(1));
 
     for (int i = 0; i < 50; i++){
-        printf("rsorted x at %d is %f",i*10000, rsorted(i*10000,0));
+        printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
     }
 
     int new_dim = local0 + order - 1;
