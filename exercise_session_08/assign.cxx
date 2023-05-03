@@ -285,8 +285,8 @@ int main(int argc, char *argv[]){
             slab_cut_indexes[counter] = i+1-i_start; 
             counter++;
         }}
-    for (int i = 0; i < (N_rank - 1); ++i){printf("slab_cut_index_i = %d\n", slab_cut_indexes[i]);}
-    int* num_particles_to_send = new int[N_rank];
+    for (int i = 0; i < N_rank; ++i){printf("slab_cut_index for rank = %d is = %d\n", i_rank, slab_cut_indexes[i]);}
+    int* num_particles_to_send = new int[N_rank];  
     num_particles_to_send[0] = slab_cut_indexes[0];
     for (int i = 1; i < N_rank; ++i) {
     num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];}
