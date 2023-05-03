@@ -339,6 +339,10 @@ int main(int argc, char *argv[]){
     printf("Start indices of r: (%d, %d)\n", r.lbound(0), r.lbound(1));
     printf("End indices of r: (%d, %d)\n", r.ubound(0), r.ubound(1));
 
+    for (int i = 0; i < 50; i++){
+        printf("rsorted x at %d is %f",i*10000, rsorted(i*10000,0));
+    }
+
     int new_dim = local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
