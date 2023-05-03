@@ -366,6 +366,8 @@ int main(int argc, char *argv[]){
     //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv); 
 
     printf("Shape of grid: (%d, %d, %d)\n", grid.shape()[0], grid.shape()[1], grid.shape()[2]);
+    printf("Start indices of grid: (%d, %d, %d)\n", grid.lbound(0), grid.lbound(1),grid.lbound(2));
+    printf("End indices of grid: (%d, %d, %d)\n", grid.ubound(0), grid.ubound(1),grid.ubound(2));
     #pragma omp parallel for
     for (int pn = 0; pn < 100000 ; pn++)
     {
