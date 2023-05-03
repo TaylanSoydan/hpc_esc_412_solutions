@@ -304,58 +304,57 @@ int main(int argc, char *argv[]){
         total_num_particles_to_recv += num_particles_to_recv[i];}
     printf("total_num_particles_to_recv for rank = %d is = %d\n", i_rank, total_num_particles_to_recv);
 
-    //int* MPISendCount = new int [N_rank];
-    //int* MPIRecvCount = new int [N_rank];
-    //for (int i = 0; i < N_rank; ++i) {
-    //    MPISendCount[i] = (num_particles_to_send[i] * 3);
-    //    MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
-    //}
+    int* MPISendCount = new int [N_rank];
+    int* MPIRecvCount = new int [N_rank];
+    for (int i = 0; i < N_rank; ++i) {
+        MPISendCount[i] = (num_particles_to_send[i] * 3);
+        MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
+    }
 
-    //int* MPISendOffset = new int [N_rank];
-    //int* MPIRecvOffset = new int [N_rank];
-    //MPISendOffset[0] = 0;
-    //MPIRecvOffset[0] = 0;
-    //for (int i = 1; i < N_rank; ++i)  {
-    //    MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
-    //    MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
-    //    printf("MPISendOffset for rank = %d is = %d\n", i_rank, MPISendOffset[i]);
-    //    printf("MPIRecvOffset for rank = %d is = %d\n", i_rank, MPIRecvOffset[i]);
-    //}
-    //
-    //float* r_sorted = new float [total_num_particles_to_recv * 3];
-    //MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r_sorted, MPIRecvCount, MPIRecvOffset, MPI_FLOAT, MPI_COMM_WORLD);
-    //delete [] MPISendCount;
-    //delete [] MPISendOffset;
-    //delete [] MPIRecvCount;
-    //delete [] MPIRecvOffset;
-    //delete [] num_particles_to_send;
-    //delete [] num_particles_to_recv;
-    //blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
+    int* MPISendOffset = new int [N_rank];
+    int* MPIRecvOffset = new int [N_rank];
+    MPISendOffset[0] = 0;
+    MPIRecvOffset[0] = 0;
+    for (int i = 1; i < N_rank; ++i)  {
+        MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
+        MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
+        printf("MPISendOffset for rank = %d is = %d\n", i_rank, MPISendOffset[i]);
+        printf("MPIRecvOffset for rank = %d is = %d\n", i_rank, MPIRecvOffset[i]);
+    }
+    float* r_sorted = new float [total_num_particles_to_recv * 3];
+    MPI_Alltoallv(r.data(), MPISendCount, MPISendOffset, MPI_FLOAT, r_sorted, MPIRecvCount, MPIRecvOffset, MPI_FLOAT, MPI_COMM_WORLD);
+    delete [] MPISendCount;
+    delete [] MPISendOffset;
+    delete [] MPIRecvCount;
+    delete [] MPIRecvOffset;
+    delete [] num_particles_to_send;
+    delete [] num_particles_to_recv;
+    blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
 
-    //int new_dim = local0 + order - 1;
-    //float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
-    //blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
-    //grid_data = 0.0;
-    //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-    //grid = 0.0;
-    //std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
-    //blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
+    int new_dim = local0 + order - 1;
+    float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
+    blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
+    grid_data = 0.0;
+    blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+    grid = 0.0;
+    std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
+    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
-    //start_time = std::chrono::high_resolution_clock::now();
-    //for (int i = 0; i < 10; ++i) {
-    //    std::cout << "particle i = " << rsorted(i,0);
-    //}
-    //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
-    //    int upperbound;
-    //    float upperboundary;
-    //    if (i_rank == N_rank - 1) {
-    //        upperbound = nGrid;
-    //    } else {
-    //        upperbound = COMM_SLAB_START[i_rank + 1];
-    //    }
-    //    upperboundary = (float) upperbound / nGrid;
-    //    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
-    //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
+    start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 10; ++i) {
+        std::cout << "particle i = " << rsorted(i,0);
+    }
+    assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
+        int upperbound;
+        float upperboundary;
+        if (i_rank == N_rank - 1) {
+            upperbound = nGrid;
+        } else {
+            upperbound = COMM_SLAB_START[i_rank + 1];
+        }
+        upperboundary = (float) upperbound / nGrid;
+        printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
+        printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
     //    #pragma omp parallel for
     //    for (int pn = i_start; pn < i_start + total_num_particles_to_recv ; ++pn)
     //    {
