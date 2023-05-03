@@ -296,13 +296,13 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
     printf("total_num_particles_to_send for rank = %d is = %d\n", i_rank, total_num_particles_to_send);
     
-    //int* num_particles_to_recv = new int[N_rank];
-    //MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
-    //int total_num_particles_to_recv = 0;
-    //for (int i = 0; i < N_rank; ++i) {
-    //    printf("num_particles_to_recv for rank = %d is = %d\n", i_rank, num_particles_to_recv[i]);
-    //    total_num_particles_to_recv += num_particles_to_recv[i];}
-    //printf("total_num_particles_to_recv for rank = %d is = %d\n", i_rank, total_num_particles_to_recv);
+    int* num_particles_to_recv = new int[N_rank];
+    MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
+    int total_num_particles_to_recv = 0;
+    for (int i = 0; i < N_rank; ++i) {
+        printf("num_particles_to_recv for rank = %d is = %d\n", i_rank, num_particles_to_recv[i]);
+        total_num_particles_to_recv += num_particles_to_recv[i];}
+    printf("total_num_particles_to_recv for rank = %d is = %d\n", i_rank, total_num_particles_to_recv);
 
     //int* MPISendCount = new int [N_rank];
     //int* MPIRecvCount = new int [N_rank];
