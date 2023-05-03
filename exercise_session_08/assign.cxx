@@ -355,7 +355,7 @@ int main(int argc, char *argv[]){
     //blitz::Array<float, 3> grid_data(data, dim1, dim2, dim3, storage, blitz::deleteDataWhenDone);
     grid_data = 0.0;
     //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-    blitz::Array<float, 3> grid = grid_data(blitz::Range(local0 * i_rank, local0 * (i_rank + 1)), 
+    blitz::Array<float, 3> grid = grid_data(blitz::Range(local0 * i_rank, local0 * (i_rank + 1) - 1), 
                                         blitz::Range::all(), 
                                         blitz::Range(0, nGrid - 1));
     grid = 0.0;
@@ -378,43 +378,43 @@ int main(int argc, char *argv[]){
     printf("Shape of grid: (%d, %d, %d)\n", grid.shape()[0], grid.shape()[1], grid.shape()[2]);
     printf("Start indices of grid: (%d, %d, %d)\n", grid.lbound(0), grid.lbound(1),grid.lbound(2));
     printf("End indices of grid: (%d, %d, %d)\n", grid.ubound(0), grid.ubound(1),grid.ubound(2));
-    #pragma omp parallel for
-    for (int pn = 0; pn < total_num_particles_to_recv; pn++)
-    {
-        float x = rsorted(pn, 0);
-        float y = rsorted(pn, 1);
-        float z = rsorted(pn, 2);
+    //#pragma omp parallel for
+    //for (int pn = 0; pn < total_num_particles_to_recv; pn++)
+    //{
+    //    float x = rsorted(pn, 0);
+    //    float y = rsorted(pn, 1);
+    //    float z = rsorted(pn, 2);
 
-        float rx = (x + 0.5) * nGrid;
-        float ry = (y + 0.5) * nGrid;
-        float rz = (z + 0.5) * nGrid;
+    //    float rx = (x + 0.5) * nGrid;
+    //    float ry = (y + 0.5) * nGrid;
+    //    float rz = (z + 0.5) * nGrid;
 
-        //// precalculate Wx, Wy, Wz and return start index
-        float Wx[order], Wy[order], Wz[order];
-        int i_start = precalculate_W(Wx, order, rx);
-        int j_start = precalculate_W(Wy, order, ry);
-        int k_start = precalculate_W(Wz, order, rz);
+    //    //// precalculate Wx, Wy, Wz and return start index
+    //    float Wx[order], Wy[order], Wz[order];
+    //    int i_start = precalculate_W(Wx, order, rx);
+    //    int j_start = precalculate_W(Wy, order, ry);
+    //    int k_start = precalculate_W(Wz, order, rz);
 
-        for (int i = i_start; i < i_start + order; i++)
-        {
-            for (int j = j_start; j < j_start + order; j++)
-            {
-                for (int k = k_start; k < k_start + order; k++)
-                {
-                    float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
-                    assert (i < 100);
-                    assert (j < 100);
-                    assert (k < 100);
-                    assert (i >= 0);
-                    assert (j >= 0);
-                    assert (k >= 0);
-                    //printf("i,j,k = %d,%d,%d",i,j,k);
-                    // Deposit the mass onto grid(i,j,k)
-                    #pragma omp atomic
-                    //grid(i,j,k) += W_res;
-                    grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
-                }}}
-    }
+    //    for (int i = i_start; i < i_start + order; i++)
+    //    {
+    //        for (int j = j_start; j < j_start + order; j++)
+    //        {
+    //            for (int k = k_start; k < k_start + order; k++)
+    //            {
+    //                float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
+    //                assert (i < 100);
+    //                assert (j < 100);
+    //                assert (k < 100);
+    //                assert (i >= 0);
+    //                assert (j >= 0);
+    //                assert (k >= 0);
+    //                //printf("i,j,k = %d,%d,%d",i,j,k);
+    //                // Deposit the mass onto grid(i,j,k)
+    //                #pragma omp atomic
+    //                //grid(i,j,k) += W_res;
+    //                grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
+    //            }}}
+    //}
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -425,33 +425,33 @@ int main(int argc, char *argv[]){
 
 
     //    // Simple test
-    printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
+    //printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
 
-    if (i_rank == 0)
-    {MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
-    else
-    {MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
+    //if (i_rank == 0)
+    //{MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
+    //else
+    //{MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
 
-    if (i_rank == 0)
-    {printf("Sum of all grid mass = %f \n", blitz::sum(grid));}
-                                                                                                //        project_grid(grid, nGrid, out_filename);
+    //if (i_rank == 0)
+    //{printf("Sum of all grid mass = %f \n", blitz::sum(grid));}
+    //                                //        project_grid(grid, nGrid, out_filename);
 
-                                                                                                //        // Convert to overdensity
+    //                                //        // Convert to overdensity
     //float grid_sum = sum(grid);
     //float mean_density = grid_sum / (nGrid * nGrid * nGrid);
     //grid = (grid - mean_density) / mean_density;
 
-                                                                                                //        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
+    //                                //        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
     //fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
-                                                                                                //        
+    //                                //        
     //std::cout << "Plan created" << std::endl;
     //fftwf_execute(plan);
     //std::cout << "Plan executed" << std::endl;
     //fftwf_destroy_plan(plan);
     //std::cout << "Plan destroyed" << std::endl;
-                                                                                                //        // Linear binning is 1
-                                                                                                //        // Variable binning is 2
-                                                                                                //        // Log binning is 3
+    //                                //        // Linear binning is 1
+    //                                //        // Variable binning is 2
+    //                                //        // Log binning is 3
     //const int binning = 2;
     //int n_bins = 80;
     //if (binning == 1)
