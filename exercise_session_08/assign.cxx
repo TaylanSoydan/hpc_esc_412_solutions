@@ -389,7 +389,7 @@ int main(int argc, char *argv[]){
         float y = rsorted(pn, 1);
         float z = rsorted(pn, 2);
 
-        float rx = (x + 0.5) * upperboundary;
+        float rx = (x + 0.5) * nGrid; //std::ceil(upperboundary)
         float ry = (y + 0.5) * nGrid;
         float rz = (z + 0.5) * nGrid;
 
@@ -409,7 +409,7 @@ int main(int argc, char *argv[]){
 
                     // Deposit the mass onto grid(i,j,k)
                     #pragma omp atomic
-                    grid(wrap_edge(i, std::ceil(upperboundary)), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res;
+                    grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
                 }
             }
         }
