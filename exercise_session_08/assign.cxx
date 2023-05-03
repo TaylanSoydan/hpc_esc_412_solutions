@@ -333,13 +333,8 @@ int main(int argc, char *argv[]){
     delete [] num_particles_to_recv;
     blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
     printf("Shape of rsorted: (%d, %d)\n", rsorted.shape()[0], rsorted.shape()[1]);
-
     printf("Start indices of rsorted: (%d, %d)\n", rsorted.lbound(0), rsorted.lbound(1));
     printf("End indices of rsorted: (%d, %d)\n", rsorted.ubound(0), rsorted.ubound(1));
-
-    float summm = blitz::sum(rsorted);
-    printf("Sum of rsorted: %f\n", summm);
-
 
     int new_dim = local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
@@ -363,7 +358,7 @@ int main(int argc, char *argv[]){
     //    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
     //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
     #pragma omp parallel for
-    for (int pn = 0; pn < 100 ; pn++)
+    for (int pn = 0; pn < total_num_particles_to_recv - 1 ; pn++)
     {
         float x = rsorted(pn, 0);
         float y = rsorted(pn, 1);
