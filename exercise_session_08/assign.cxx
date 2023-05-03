@@ -406,7 +406,6 @@ int main(int argc, char *argv[]){
                 for (int k = k_start; k < k_start + order; k++)
                 {
                     float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
-                    std::cout << "i,j,k = " << i << " " << j << " " << k << "\n";
                     // Deposit the mass onto grid(i,j,k)
                     #pragma omp atomic
                     grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
