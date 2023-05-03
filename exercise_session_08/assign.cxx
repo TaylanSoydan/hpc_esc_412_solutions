@@ -339,9 +339,9 @@ int main(int argc, char *argv[]){
     printf("Start indices of r: (%d, %d)\n", r.lbound(0), r.lbound(1));
     printf("End indices of r: (%d, %d)\n", r.ubound(0), r.ubound(1));
 
-    for (int i = 0; i < 50; i++){
-        printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
-    }
+    //for (int i = 0; i < 50; i++){
+      //  printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
+    //}
 
     int new_dim = nGrid;//local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
@@ -369,7 +369,7 @@ int main(int argc, char *argv[]){
     printf("Start indices of grid: (%d, %d, %d)\n", grid.lbound(0), grid.lbound(1),grid.lbound(2));
     printf("End indices of grid: (%d, %d, %d)\n", grid.ubound(0), grid.ubound(1),grid.ubound(2));
     #pragma omp parallel for
-    for (int pn = 0; pn < total_num_particles_to_recv ; pn++)
+    for (int pn = 0; pn < total_num_particles_to_recv; pn++)
     {
         float x = rsorted(pn, 0);
         float y = rsorted(pn, 1);
@@ -401,8 +401,8 @@ int main(int argc, char *argv[]){
                     //printf("i,j,k = %d,%d,%d",i,j,k);
                     // Deposit the mass onto grid(i,j,k)
                     #pragma omp atomic
-                    grid(i,j,k) += W_res;
-                    //grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
+                    //grid(i,j,k) += W_res;
+                    grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
                 }}}
     }
 
