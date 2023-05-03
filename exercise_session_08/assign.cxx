@@ -313,20 +313,20 @@ int main(int argc, char *argv[]){
     num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];
     }
     for (int i = 0; i < N_rank; ++i) {
-    std::cout << "num_particles_to_send [i] = " << num_particles_to_send[i] << "\n";
+    std::cout << "num_particles_to_send for rank = " << i_rank << " is = " <<  num_particles_to_send[i] << "\n";
     }
     int total_num_particles_to_send = 0;
     for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
-    std::cout << "total_num_particles_to_send = " << total_num_particles_to_send << "\n";
+    std::cout << "total_num_particles_to_send for rank = " << i_rank << " is = " << total_num_particles_to_send << "\n";
     int* num_particles_to_recv = new int[N_rank];
     MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
 
     int total_num_particles_to_recv = 0;
     for (int i = 0; i < N_rank; ++i) {
-        std::cout << "num_particles_to_recv [i] = " << num_particles_to_recv[i] << "\n";
+        std::cout << "num_particles_to_recv for rank = " << i_rank << " is = " << num_particles_to_recv[i] << "\n";
         total_num_particles_to_recv += num_particles_to_recv[i];
     }
-    std::cout << "total_num_particles_to_recv = " << total_num_particles_to_recv << "\n";
+    std::cout << "total_num_particles_to_recv for rank = " << i_rank << " is = " << total_num_particles_to_recv << "\n";
 
     int* MPISendCount = new int [N_rank];
     int* MPIRecvCount = new int [N_rank];
@@ -342,8 +342,8 @@ int main(int argc, char *argv[]){
     for (int i = 1; i < N_rank; ++i)  {
         MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
         MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
-        std::cout << "MPISendOffset [i] = " << MPISendOffset[i] << "\n";
-        std::cout << "MPIRecvOffset [i] = " << MPIRecvOffset[i] << "\n";
+        std::cout << "MPISendOffset for rank = " << i_rank << " is = " << MPISendOffset[i] << "\n";
+        std::cout << "MPIRecvOffset for rank = " << i_rank << " is = " << MPIRecvOffset[i] << "\n";
     }
     
     float* r_sorted = new float [total_num_particles_to_recv * 3];
