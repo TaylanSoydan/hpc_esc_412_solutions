@@ -255,7 +255,7 @@ int main(int argc, char *argv[]){
     std::cerr << "Loading " << N << " particles" << std::endl;
     blitz::Array<float, 2> r(blitz::Range(i_start, i_end - 1), blitz::Range(0, 2));
 
-    std::cout << "i am rank = " << i_rank << " i_start, i_end - 1 = " << i_start << "," << i_end - 1 << " \n";
+    std::cout << "I AM RANK = " << i_rank << " i_start, i_end - 1 = " << i_start << "," << i_end - 1 << " \n";
     io.load(r);
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
     //std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
@@ -332,6 +332,10 @@ int main(int argc, char *argv[]){
     delete [] num_particles_to_send;
     delete [] num_particles_to_recv;
     blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
+    printf("Shape of r: (%ld, %ld)\n", rsorted.shape()[0], rsorted.shape()[1]);
+    printf("Start index of r: %d\n", rsorted.lbound());
+    printf("End index of r: %d\n", rsorted.ubound());
+    printf("Sum of r: %f\n", blitz::sum(rsorted));
 
     int new_dim = local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
@@ -355,7 +359,7 @@ int main(int argc, char *argv[]){
     //    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
     //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
     #pragma omp parallel for
-    for (int pn = 0; pn < 50000 ; pn++)
+    for (int pn = 0; pn < 100 ; pn++)
     {
         float x = rsorted(pn, 0);
         float y = rsorted(pn, 1);
