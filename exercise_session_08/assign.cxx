@@ -375,7 +375,7 @@ int main(int argc, char *argv[]){
         upperbound = COMM_SLAB_START[i_rank + 1];
     }
     upperboundary = (float) upperbound / nGrid;
-    printf("i_rank = %d upperboundary = %d\n", i_rank, upperboundary);    
+    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
     printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
     #pragma omp parallel for
     for (int pn = i_start; pn < i_start + total_num_particles_to_recv ; ++pn)
