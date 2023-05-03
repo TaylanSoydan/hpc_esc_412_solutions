@@ -119,7 +119,7 @@ void save_binning(const int binning, std::vector<float> &fPower, std::vector<int
     f1.close();
 }
 
-void assign_mass(blitz::Array<float, 2> &r, int part_i_start, int part_i_end, int nGrid, blitz::Array<float, 3> &grid, int order = 4)
+void assign_mass(blitz::Array<float, 2> &r, int part_i_start, int part_i_end, int nGrid, blitz::Array<float, 3> &grid, int order = 1)
 {
     // Loop over all cells for this assignment
     float cell_half = 0.5;
@@ -331,10 +331,13 @@ int main(int argc, char *argv[]){
     delete [] MPIRecvOffset;
     delete [] num_particles_to_send;
     delete [] num_particles_to_recv;
-    blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
+    blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3)); //, blitz::deleteDataWhenDone);
     printf("Shape of rsorted: (%d, %d)\n", rsorted.shape()[0], rsorted.shape()[1]);
     printf("Start indices of rsorted: (%d, %d)\n", rsorted.lbound(0), rsorted.lbound(1));
     printf("End indices of rsorted: (%d, %d)\n", rsorted.ubound(0), rsorted.ubound(1));
+    printf("Shape of r: (%d, %d)\n", r.shape()[0], r.shape()[1]);
+    printf("Start indices of r: (%d, %d)\n", r.lbound(0), r.lbound(1));
+    printf("End indices of r: (%d, %d)\n", r.ubound(0), r.ubound(1));
 
     int new_dim = local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
