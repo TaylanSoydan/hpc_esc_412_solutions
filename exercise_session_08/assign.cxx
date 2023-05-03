@@ -220,7 +220,7 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &N_rank);
 
     ptrdiff_t alloc_local, local0, start0;
-    fftw_mpi_init();
+    fftw_mpi_init()ssh e
     alloc_local = fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
     assert (local0 > 0);
     printf("local0 = %ld start0 = %ld \n", local0, start0);
@@ -344,9 +344,15 @@ int main(int argc, char *argv[]){
       //  printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
     //}
 
-    int new_dim = nGrid;//local0 + order - 1;
+    int new_dim = local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
-    blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
+    blitz::Range dim1(local0 * i_rank ,local0 * (i_rank + 1));
+	blitz::Range dim2(0,nGrid);
+	blitz::Range dim3(0,nGrid+2);	
+	blitz::GeneralArrayStorage<3> storage;
+	//blitz::Array<int,3> A(dim1,dim2,dim3,storage);
+    //blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
+    blitz::Array<float, 3> grid_data(data, dim1, dim2, dim3, storage, blitz::deleteDataWhenDone);
     grid_data = 0.0;
     blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     grid = 0.0;
