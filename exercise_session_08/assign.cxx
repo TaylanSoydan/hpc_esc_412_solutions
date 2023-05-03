@@ -403,7 +403,7 @@ int main(int argc, char *argv[]){
     {MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
 
     if (i_rank == 0)
-    {printf("Sum of all grid mass = %d \n", blitz::sum(grid));}
+    {printf("Sum of all grid mass = %f \n", blitz::sum(grid));}
                                                                                                 //        project_grid(grid, nGrid, out_filename);
 
                                                                                                 //        // Convert to overdensity
