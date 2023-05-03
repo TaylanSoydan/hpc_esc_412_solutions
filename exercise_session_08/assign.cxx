@@ -387,9 +387,9 @@ int main(int argc, char *argv[]){
                     assert (i < 100);
                     assert (j < 100);
                     assert (k < 100);
-                    assert (i > 0);
-                    assert (j > 0);
-                    assert (k > 0);
+                    assert (i >= 0);
+                    assert (j >= 0);
+                    assert (k >= 0);
                     //printf("i,j,k = %d,%d,%d",i,j,k);
                     // Deposit the mass onto grid(i,j,k)
                     //#pragma omp atomic
