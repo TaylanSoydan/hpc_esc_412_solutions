@@ -343,7 +343,7 @@ int main(int argc, char *argv[]){
         printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
     }
 
-    int new_dim = local0 + order - 1;
+    int new_dim = nGrid;//local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
     grid_data = 0.0;
@@ -400,8 +400,8 @@ int main(int argc, char *argv[]){
                     assert (k >= 0);
                     //printf("i,j,k = %d,%d,%d",i,j,k);
                     // Deposit the mass onto grid(i,j,k)
-                    //#pragma omp atomic
-                    //grid(i,j,k) += W_res;
+                    #pragma omp atomic
+                    grid(i,j,k) += W_res;
                     //grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
                 }}}
     }
