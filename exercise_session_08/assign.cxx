@@ -395,22 +395,15 @@ int main(int argc, char *argv[]){
 
 
     //    // Simple test
-    //printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
+    printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
 
-    //if (i_rank == 0)
-    //{
-    //    MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //}
-    //else
-    //{
-    //    MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //}
+    if (i_rank == 0)
+    {MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
+    else
+    {MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
 
-    //if (i_rank == 0)
-    //{
-    //    // Simple test
-    //    std::cout << "Sum of all grid mass = " << blitz::sum(grid) << std::endl;
-    //}
+    if (i_rank == 0)
+    {printf("Sum of all grid mass = %d \n" << blitz::sum(grid))}
                                                                                                 //        project_grid(grid, nGrid, out_filename);
 
                                                                                                 //        // Convert to overdensity
