@@ -222,7 +222,7 @@ int main(int argc, char *argv[]){
     ptrdiff_t alloc_local, local0, start0;
     alloc_local = fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
     assert (local0 > 0);
-
+    printf("local0 = %d start0 = %d", local0, start0);
 
     int* COMM_SLAB_SIZE = new int [N_rank];
     int* COMM_SLAB_START = new int [N_rank];
