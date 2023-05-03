@@ -341,20 +341,17 @@ int main(int argc, char *argv[]){
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
     start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < 10; ++i) {
-        std::cout << "particle i = " << rsorted(i,0);
-    }
-    assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
-        int upperbound;
-        float upperboundary;
-        if (i_rank == N_rank - 1) {
-            upperbound = nGrid;
-        } else {
-            upperbound = COMM_SLAB_START[i_rank + 1];
-        }
-        upperboundary = (float) upperbound / nGrid;
-        printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
-        printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
+    //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
+    //int upperbound;
+    //    float upperboundary;
+    //    if (i_rank == N_rank - 1) {
+    //        upperbound = nGrid;
+    //    } else {
+    //        upperbound = COMM_SLAB_START[i_rank + 1];
+    //    }
+    //    upperboundary = (float) upperbound / nGrid;
+    //    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
+    //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
     //    #pragma omp parallel for
     //    for (int pn = i_start; pn < i_start + total_num_particles_to_recv ; ++pn)
     //    {
