@@ -351,13 +351,12 @@ int main(int argc, char *argv[]){
 	blitz::Range dim3(0,nGrid+2);	
 	blitz::GeneralArrayStorage<3> storage;
 	//blitz::Array<int,3> A(dim1,dim2,dim3,storage);
-    blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
-    //blitz::Array<float, 3> grid_data(data, dim1, dim2, dim3, storage, blitz::deleteDataWhenDone);
+    blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, nGrid), blitz::deleteDataWhenDone);
     grid_data = 0.0;
     //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-    blitz::Array<float, 3> grid = grid_data(blitz::Range(start0, start0 + local0), 
-                                        blitz::Range::all(), 
-                                        blitz::Range(0, nGrid - 1));
+    blitz::Array<float, 3> grid = grid_data(blitz::Range(start0, start0 + local0 - 1), 
+                                            blitz::Range::all(), 
+                                            blitz::Range::all());
     grid = 0.0;
     //std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     //blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
