@@ -231,7 +231,7 @@ int main(int argc, char *argv[]){
     MPI_Allgather(&local0, 1, MPI_INT, COMM_SLAB_SIZE, 1, MPI_INT, MPI_COMM_WORLD);
 
     int current = 0;
-    for (int i = 0; i < nGrid; ++i) {
+    for (int i = 0; i < nGrid; i++) {
         if (current < N_rank - 1 && COMM_SLAB_START[current + 1] <= i) current++;
         SLAB2RANK[i] = current;
     }
@@ -263,7 +263,7 @@ int main(int argc, char *argv[]){
     
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
 
-    for (int i = i_start; i < i_end-1; ++i){
+    for (int i = i_start; i < i_end-1; i++){
         if (r(i, 0) > r(i+1,0)){
             std::cout << "r not sorted properly" << "\n";
         }
@@ -272,7 +272,7 @@ int main(int argc, char *argv[]){
     slab_cut_indexes[N_rank - 1] = i_end - i_start;
     int counter = 0;
     printf("starting to find slab cut indexes \n");
-    for (int i = i_start; i < i_end; ++i){
+    for (int i = i_start; i < i_end; i++){
         int particle_slab = int((r(i, 0) + 0.5)*nGrid);
         int next_particle_slab = int((r(i+1, 0) + 0.5)*nGrid);
         int particle_rank = SLAB2RANK[particle_slab];
@@ -285,28 +285,28 @@ int main(int argc, char *argv[]){
             slab_cut_indexes[counter] = i+1-i_start; 
             counter++;
         }}
-    for (int i = 0; i < N_rank; ++i){printf("slab_cut_index for rank = %d is = %d\n", i_rank, slab_cut_indexes[i]);}
+    for (int i = 0; i < N_rank; i++){printf("slab_cut_index for rank = %d is = %d\n", i_rank, slab_cut_indexes[i]);}
     int* num_particles_to_send = new int[N_rank];  
     num_particles_to_send[0] = slab_cut_indexes[0];
-    for (int i = 1; i < N_rank; ++i) {
+    for (int i = 1; i < N_rank; i++) {
     num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];}
     
-    for (int i = 0; i < N_rank; ++i) {printf("num_particles_to_send for rank = %d is = %d\n", i_rank, num_particles_to_send[i]);}
+    for (int i = 0; i < N_rank; i++) {printf("num_particles_to_send for rank = %d is = %d\n", i_rank, num_particles_to_send[i]);}
     int total_num_particles_to_send = 0;
-    for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
+    for (int i = 0; i < N_rank; i++) total_num_particles_to_send += num_particles_to_send[i];
     printf("total_num_particles_to_send for rank = %d is = %d\n", i_rank, total_num_particles_to_send);
     
     int* num_particles_to_recv = new int[N_rank];
     MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
     int total_num_particles_to_recv = 0;
-    for (int i = 0; i < N_rank; ++i) {
+    for (int i = 0; i < N_rank; i++) {
         printf("num_particles_to_recv for rank = %d is = %d\n", i_rank, num_particles_to_recv[i]);
         total_num_particles_to_recv += num_particles_to_recv[i];}
     printf("total_num_particles_to_recv for rank = %d is = %d\n", i_rank, total_num_particles_to_recv);
 
     int* MPISendCount = new int [N_rank];
     int* MPIRecvCount = new int [N_rank];
-    for (int i = 0; i < N_rank; ++i) {
+    for (int i = 0; i < N_rank; i++) {
         MPISendCount[i] = (num_particles_to_send[i] * 3);
         MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
     }
@@ -315,7 +315,7 @@ int main(int argc, char *argv[]){
     int* MPIRecvOffset = new int [N_rank];
     MPISendOffset[0] = 0;
     MPIRecvOffset[0] = 0;
-    for (int i = 1; i < N_rank; ++i)  {
+    for (int i = 1; i < N_rank; i++)  {
         MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
         MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
         printf("MPISendOffset for rank = %d is = %d\n", i_rank, MPISendOffset[i]);
