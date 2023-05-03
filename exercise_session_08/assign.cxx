@@ -344,13 +344,26 @@ int main(int argc, char *argv[]){
       //  printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
     //}
 
-    int new_dim = local0 + order - 1;
-    float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
+    //int new_dim = local0 + order - 1;
+    //float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
+    //blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
+    //grid_data = 0.0;
+    ////blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+    //printf("i am rank %d so range is from %d to %d",i_rank, (50 * i_rank), (50 * (i_rank + 1) - 1));
+    //blitz::Array<float, 3> grid = grid_data(blitz::Range((50 * i_rank), (50 * (i_rank + 1) - 1)), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+
+    float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
     grid_data = 0.0;
-    //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-    printf("i am rank %d so range is from %d to %d",i_rank, (50 * i_rank), (50 * (i_rank + 1) - 1));
-    blitz::Array<float, 3> grid = grid_data(blitz::Range((50 * i_rank), (50 * (i_rank + 1) - 1)), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+
+    int start_index = 50 * i_rank;
+    int end_index = 50 * (i_rank + 1) - 1;
+
+    blitz::Range range1(start_index, end_index);
+    blitz::Range range2 = blitz::Range::all();
+    blitz::Range range3(0, nGrid - 1);
+
+    blitz::Array<float, 3> grid = grid_data(range1, range2, range3);
 
 
     //blitz::Range(start0, start0 + local0 - 1), 
