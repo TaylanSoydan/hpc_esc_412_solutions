@@ -351,19 +351,11 @@ int main(int argc, char *argv[]){
     ////blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     //printf("i am rank %d so range is from %d to %d",i_rank, (50 * i_rank), (50 * (i_rank + 1) - 1));
     //blitz::Array<float, 3> grid = grid_data(blitz::Range((50 * i_rank), (50 * (i_rank + 1) - 1)), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-
+    printf("i_rank = %d start0 = %ld local0 = %ld", i_rank, start0, local0 );
     float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)];
-    blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
+    blitz::Array<float, 3> grid_data(data, blitz::shape(start0 + 1, local0, local0 + start0), blitz::deleteDataWhenDone);
     grid_data = 0.0;
-
-    int start_index = 50 * i_rank;
-    int end_index = 50 * (i_rank + 1) - 1;
-
-    blitz::Range range1(start_index, end_index);
-    blitz::Range range2 = blitz::Range::all();
-    blitz::Range range3(0, nGrid - 1);
-
-    blitz::Array<float, 3> grid = grid_data(range1, range2, range3);
+    blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
 
 
     //blitz::Range(start0, start0 + local0 - 1), 
@@ -383,6 +375,9 @@ int main(int argc, char *argv[]){
     //    upperboundary = (float) upperbound / nGrid;
     //    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
     //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv); 
+    printf("Shape of grid_data: (%d, %d, %d)\n", grid_data.shape()[0], grid_data.shape()[1], grid_data.shape()[2]);
+    printf("Start indices of grid_data: (%d, %d, %d)\n", grid_data.lbound(0), grid_data.lbound(1),grid_data.lbound(2));
+    printf("End indices of grid_data: (%d, %d, %d)\n", grid_data.ubound(0), grid_data.ubound(1),grid_data.ubound(2));
 
     printf("Shape of grid: (%d, %d, %d)\n", grid.shape()[0], grid.shape()[1], grid.shape()[2]);
     printf("Start indices of grid: (%d, %d, %d)\n", grid.lbound(0), grid.lbound(1),grid.lbound(2));
