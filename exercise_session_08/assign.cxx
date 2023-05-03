@@ -359,7 +359,9 @@ int main(int argc, char *argv[]){
     //    }
     //    upperboundary = (float) upperbound / nGrid;
     //    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
-    //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
+    //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv); 
+
+    printf("Shape of grid: (%d, %d)\n", grid.shape()[0], grid.shape()[1]);
     #pragma omp parallel for
     for (int pn = 0; pn < 100000 ; pn++)
     {
