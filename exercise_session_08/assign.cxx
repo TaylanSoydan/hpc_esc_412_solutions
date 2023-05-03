@@ -369,7 +369,7 @@ int main(int argc, char *argv[]){
     printf("Start indices of grid: (%d, %d, %d)\n", grid.lbound(0), grid.lbound(1),grid.lbound(2));
     printf("End indices of grid: (%d, %d, %d)\n", grid.ubound(0), grid.ubound(1),grid.ubound(2));
     #pragma omp parallel for
-    for (int pn = 0; pn < 100000 ; pn++)
+    for (int pn = 0; pn < 1000000 ; pn++)
     {
         float x = rsorted(pn, 0);
         float y = rsorted(pn, 1);
