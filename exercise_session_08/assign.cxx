@@ -355,7 +355,7 @@ int main(int argc, char *argv[]){
     float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
     grid_data = 0.0;
-    blitz::Array<float, 3> grid = grid_data(blitz::Range(1,20), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+    blitz::Array<float, 3> grid = grid_data(blitz::Range(10,20), blitz::Range::all(), blitz::Range(0, nGrid - 1));
 
 
     //blitz::Range(start0, start0 + local0 - 1), 
