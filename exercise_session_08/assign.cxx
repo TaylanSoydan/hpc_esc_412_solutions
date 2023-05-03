@@ -227,7 +227,6 @@ int main(int argc, char *argv[]){
     int* COMM_SLAB_SIZE = new int [N_rank];
     int* COMM_SLAB_START = new int [N_rank];
     int* SLAB2RANK = new int[nGrid];
-    SLAB2RANK = 0;
     MPI_Allgather(&start0, 1, MPI_INT, COMM_SLAB_START, 1, MPI_INT, MPI_COMM_WORLD);
     MPI_Allgather(&local0, 1, MPI_INT, COMM_SLAB_SIZE, 1, MPI_INT, MPI_COMM_WORLD);
 
@@ -291,6 +290,7 @@ int main(int argc, char *argv[]){
     num_particles_to_send[0] = slab_cut_indexes[0];
     for (int i = 1; i < N_rank; ++i) {
     num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];}
+    
     for (int i = 0; i < N_rank; ++i) {printf("num_particles_to_send for rank = %d is = %d\n", i_rank, num_particles_to_send[i]);}
     int total_num_particles_to_send = 0;
     for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
