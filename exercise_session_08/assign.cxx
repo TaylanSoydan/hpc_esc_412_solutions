@@ -381,7 +381,7 @@ int main(int argc, char *argv[]){
     }
     upperboundary = (float) upperbound / nGrid;
     std::cout << "i_rank = " << i_rank << " upperboundary = " << upperboundary << "\n";
-
+    std::cout << "i_start = " << i_start << " i_start + total_num_particles_to_recv = " << i_start + total_num_particles_to_recv << "\n";
     #pragma omp parallel for
     for (int pn = i_start; pn < i_start + total_num_particles_to_recv ; ++pn)
     {
@@ -406,7 +406,7 @@ int main(int argc, char *argv[]){
                 for (int k = k_start; k < k_start + order; k++)
                 {
                     float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
-
+                    std::cout << "i,j,k = " << i << " " << j << " " << k << "\n";
                     // Deposit the mass onto grid(i,j,k)
                     #pragma omp atomic
                     grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
