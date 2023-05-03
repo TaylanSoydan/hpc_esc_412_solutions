@@ -258,7 +258,7 @@ int main(int argc, char *argv[]){
     std::cout << "i am rank = " << i_rank << " i_start, i_end - 1 = " << i_start << "," << i_end - 1 << " \n";
     io.load(r);
     std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
-    std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
+    //std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     qsort(r.data(), r.rows(), 3*sizeof(float),compare);
@@ -269,7 +269,6 @@ int main(int argc, char *argv[]){
         }
     }
     
-
     int * slab_cut_indexes = new int [N_rank];
     slab_cut_indexes[N_rank - 1] = i_end - i_start;
     int counter = 0;
@@ -280,10 +279,7 @@ int main(int argc, char *argv[]){
         int next_particle_slab = int((r(i+1, 0) + 0.5)*nGrid);
         int particle_rank = SLAB2RANK[particle_slab];
         int next_particle_rank = SLAB2RANK[next_particle_slab];
-
-        //std::cout << "cut_point = " << i+1-i_start << "r = "<< r(i, 0) << "int((r(i, 0) + 0.5)) = " <<int((r(i, 0) + 0.5))  << "ngrid = " << nGrid<< "\n";
         if (next_particle_rank > particle_rank) {
-
             printf("r(i, 0) + 0.5 = %f r(i+1, 0) + 0.5 = %f\n", r(i, 0) + 0.5, r(i+1, 0) + 0.5);
             printf("particle_rank = %d next_particle_rank = %d\n", particle_rank, next_particle_rank);
             printf("i = %d i_start = %d i_end = %d\n", i, i_start, i_end);
@@ -291,8 +287,6 @@ int main(int argc, char *argv[]){
             slab_cut_indexes[counter] = i+1-i_start; 
             counter++;
         }}
-    printf("finished cuts \n");
-
     for (int i = 0; i < (N_rank - 1); ++i){
         printf("slab_cut_index_i = %d\n", slab_cut_indexes[i]);
     }
@@ -414,13 +408,11 @@ int main(int argc, char *argv[]){
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
-    std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
+    //std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
 
 
         // Simple test
-    std::cout << "For rank = " << i_rank << " sum of mass = " << blitz::sum(grid) << std::endl;
-
-
+    printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
 
     if (i_rank == 0)
     {
