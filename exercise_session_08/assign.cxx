@@ -353,9 +353,9 @@ int main(int argc, char *argv[]){
     //blitz::Array<float, 3> grid = grid_data(blitz::Range((50 * i_rank), (50 * (i_rank + 1) - 1)), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     printf("i_rank = %d start0 = %ld local0 = %ld", i_rank, start0, local0 );
     float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)];
-    blitz::Array<float, 3> grid_data(data, blitz::shape(start0 + 1, local0, local0 + start0), blitz::deleteDataWhenDone);
+    blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
     grid_data = 0.0;
-    blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+    blitz::Array<float, 3> grid = grid_data(blitz::Range(17,31+i_rank+start0), blitz::Range::all(), blitz::Range(0, nGrid - 1));
 
 
     //blitz::Range(start0, start0 + local0 - 1), 
