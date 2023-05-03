@@ -350,7 +350,7 @@ int main(int argc, char *argv[]){
     grid_data = 0.0;
     //blitz::Array<float, 3> grid = grid_data(blitz::Range::all(), blitz::Range::all(), blitz::Range(0, nGrid - 1));
     printf("i am rank %d so range is from %d to %d",i_rank, (50 * i_rank), (50 * (i_rank + 1) - 1));
-    blitz::Array<float, 3> grid = grid_data(blitz::Range(50 * i_rank, 50 * (i_rank + 1) - 1), blitz::Range::all(), blitz::Range(0, nGrid - 1));
+    blitz::Array<float, 3> grid = grid_data(blitz::Range((50 * i_rank), (50 * (i_rank + 1) - 1)), blitz::Range::all(), blitz::Range(0, nGrid - 1));
 
 
     //blitz::Range(start0, start0 + local0 - 1), 
