@@ -230,9 +230,6 @@ int main(int argc, char *argv[]){
     MPI_Allgather(&start0, 1, MPI_INT, COMM_SLAB_START, 1, MPI_INT, MPI_COMM_WORLD);
     MPI_Allgather(&local0, 1, MPI_INT, COMM_SLAB_SIZE, 1, MPI_INT, MPI_COMM_WORLD);
 
-
-    
-
     int current = 0;
     for (int i = 0; i < nGrid; ++i) {
         if (current < N_rank - 1 && COMM_SLAB_START[current + 1] <= i) current++;
@@ -388,9 +385,9 @@ int main(int argc, char *argv[]){
     #pragma omp parallel for
     for (int pn = i_start; pn < i_start + total_num_particles_to_recv ; ++pn)
     {
-        float x = r(pn, 0);
-        float y = r(pn, 1);
-        float z = r(pn, 2);
+        float x = rsorted(pn, 0);
+        float y = rsorted(pn, 1);
+        float z = rsorted(pn, 2);
 
         float rx = (x + 0.5) * upperboundary;
         float ry = (y + 0.5) * nGrid;
