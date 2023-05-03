@@ -268,11 +268,9 @@ int main(int argc, char *argv[]){
             std::cout << "r not sorted properly" << "\n";
         }
     }
-    
     int * slab_cut_indexes = new int [N_rank];
     slab_cut_indexes[N_rank - 1] = i_end - i_start;
     int counter = 0;
-    int particle_slab;
     printf("starting to find slab cut indexes \n");
     for (int i = i_start; i < i_end; ++i){
         int particle_slab = int((r(i, 0) + 0.5)*nGrid);
@@ -287,37 +285,22 @@ int main(int argc, char *argv[]){
             slab_cut_indexes[counter] = i+1-i_start; 
             counter++;
         }}
-    for (int i = 0; i < (N_rank - 1); ++i){
-        printf("slab_cut_index_i = %d\n", slab_cut_indexes[i]);
-    }
-
-//for (int i = 0; i < N_rank - 1; ++i){
-  //  assert (slab_cut_indexes[i] < slab_cut_indexes[i+1]);
-//}
-
+    for (int i = 0; i < (N_rank - 1); ++i){printf("slab_cut_index_i = %d\n", slab_cut_indexes[i]);}
     int* num_particles_to_send = new int[N_rank];
     num_particles_to_send[0] = slab_cut_indexes[0];
-
     for (int i = 1; i < N_rank; ++i) {
-    num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];
-    }
-    for (int i = 0; i < N_rank; ++i) {
-    printf("num_particles_to_send for rank = %d is = %d\n", i_rank, num_particles_to_send[i]);
-    }
+    num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];}
+    for (int i = 0; i < N_rank; ++i) {printf("num_particles_to_send for rank = %d is = %d\n", i_rank, num_particles_to_send[i]);}
     int total_num_particles_to_send = 0;
     for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
     printf("total_num_particles_to_send for rank = %d is = %d\n", i_rank, total_num_particles_to_send);
-
     int* num_particles_to_recv = new int[N_rank];
     MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
-
     int total_num_particles_to_recv = 0;
     for (int i = 0; i < N_rank; ++i) {
         printf("num_particles_to_recv for rank = %d is = %d\n", i_rank, num_particles_to_recv[i]);
-        total_num_particles_to_recv += num_particles_to_recv[i];
-    }
+        total_num_particles_to_recv += num_particles_to_recv[i];}
     printf("total_num_particles_to_recv for rank = %d is = %d\n", i_rank, total_num_particles_to_recv);
-
 
     int* MPISendCount = new int [N_rank];
     int* MPIRecvCount = new int [N_rank];
