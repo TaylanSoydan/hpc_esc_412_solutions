@@ -235,11 +235,7 @@ int main(int argc, char *argv[]){
         if (current < N_rank - 1 && COMM_SLAB_START[current + 1] <= i) current++;
         SLAB2RANK[i] = current;
     }
-    std::cout << "SLAB2RANK[17] = " << SLAB2RANK[17] << "\n";
-    std::cout << "SLAB2RANK[27] = " << SLAB2RANK[27] << "\n";
-    std::cout << "SLAB2RANK[37] = " << SLAB2RANK[37] << "\n";
-    std::cout << "SLAB2RANK[47] = " << SLAB2RANK[47] << "\n";
-    std::cout << "SLAB2RANK[87] = " << SLAB2RANK[87] << "\n";
+
     auto start_time = std::chrono::high_resolution_clock::now();
 
     TipsyIO io;
@@ -278,7 +274,7 @@ int main(int argc, char *argv[]){
     slab_cut_indexes[N_rank - 1] = i_end - i_start;
     int counter = 0;
     int particle_slab;
-    std::cout<< "starting to find slab cut indexes" << "\n";
+    printf("starting to find slab cut indexes \n");
     for (int i = i_start; i < i_end; ++i){
         int particle_slab = int((r(i, 0) + 0.5)*nGrid);
         int next_particle_slab = int((r(i+1, 0) + 0.5)*nGrid);
@@ -288,18 +284,17 @@ int main(int argc, char *argv[]){
         //std::cout << "cut_point = " << i+1-i_start << "r = "<< r(i, 0) << "int((r(i, 0) + 0.5)) = " <<int((r(i, 0) + 0.5))  << "ngrid = " << nGrid<< "\n";
         if (next_particle_rank > particle_rank) {
 
-            std::cout << "r(i, 0) + 0.5 = " << r(i, 0) + 0.5 << " " << "r(i+1, 0) + 0.5 = " << r(i+1, 0) + 0.5 << "\n";
-            std::cout << "particle_rank = " << particle_rank << " " << "next_particle_rank = " << next_particle_rank << "\n";
-            std::cout << "i = " << i << " " << "i_start = " << i_start << " " << "i_end = " << i_end << "\n";
-            std::cout<<" will be cut at " << i-i_start << "\n";
-            slab_cut_indexes[counter] = i-i_start; //i+1-i_start;
+            printf("r(i, 0) + 0.5 = %f r(i+1, 0) + 0.5 = %f\n", r(i, 0) + 0.5, r(i+1, 0) + 0.5);
+            printf("particle_rank = %d next_particle_rank = %d\n", particle_rank, next_particle_rank);
+            printf("i = %d i_start = %d i_end = %d\n", i, i_start, i_end);
+            printf("will be cut at %d\n", i-i_start);
+            slab_cut_indexes[counter] = i+1-i_start; 
             counter++;
         }}
-    std::cout<< "finished slab cut indexes" << "\n";
-
+    printf("finished cuts \n");
 
     for (int i = 0; i < (N_rank - 1); ++i){
-        std::cout << "slab_cut_index_i = " << slab_cut_indexes[i] << "\n";
+        printf("slab_cut_index_i = %d\n", slab_cut_indexes[i]);
     }
 
 //for (int i = 0; i < N_rank - 1; ++i){
@@ -313,20 +308,22 @@ int main(int argc, char *argv[]){
     num_particles_to_send[i] = slab_cut_indexes[i] - slab_cut_indexes[i-1];
     }
     for (int i = 0; i < N_rank; ++i) {
-    std::cout << "num_particles_to_send for rank = " << i_rank << " is = " <<  num_particles_to_send[i] << "\n";
+    printf("num_particles_to_send for rank = %d is = %d\n", i_rank, num_particles_to_send[i]);
     }
     int total_num_particles_to_send = 0;
     for (int i = 0; i < N_rank; ++i) total_num_particles_to_send += num_particles_to_send[i];
-    std::cout << "total_num_particles_to_send for rank = " << i_rank << " is = " << total_num_particles_to_send << "\n";
+    printf("total_num_particles_to_send for rank = %d is = %d\n", i_rank, total_num_particles_to_send);
+
     int* num_particles_to_recv = new int[N_rank];
     MPI_Alltoall(num_particles_to_send, 1, MPI_INT, num_particles_to_recv, 1, MPI_INT, MPI_COMM_WORLD);
 
     int total_num_particles_to_recv = 0;
     for (int i = 0; i < N_rank; ++i) {
-        std::cout << "num_particles_to_recv for rank = " << i_rank << " is = " << num_particles_to_recv[i] << "\n";
+        printf("num_particles_to_recv for rank = %d is = %d\n", i_rank, num_particles_to_recv[i]);
         total_num_particles_to_recv += num_particles_to_recv[i];
     }
-    std::cout << "total_num_particles_to_recv for rank = " << i_rank << " is = " << total_num_particles_to_recv << "\n";
+    printf("total_num_particles_to_recv for rank = %d is = %d\n", i_rank, total_num_particles_to_recv);
+
 
     int* MPISendCount = new int [N_rank];
     int* MPIRecvCount = new int [N_rank];
@@ -342,8 +339,8 @@ int main(int argc, char *argv[]){
     for (int i = 1; i < N_rank; ++i)  {
         MPISendOffset[i] = MPISendOffset[i-1] + MPISendCount[i-1];
         MPIRecvOffset[i] = MPIRecvOffset[i-1] + MPIRecvCount[i-1];
-        std::cout << "MPISendOffset for rank = " << i_rank << " is = " << MPISendOffset[i] << "\n";
-        std::cout << "MPIRecvOffset for rank = " << i_rank << " is = " << MPIRecvOffset[i] << "\n";
+        printf("MPISendOffset for rank = %d is = %d\n", i_rank, MPISendOffset[i]);
+        printf("MPIRecvOffset for rank = %d is = %d\n", i_rank, MPIRecvOffset[i]);
     }
     
     float* r_sorted = new float [total_num_particles_to_recv * 3];
@@ -357,7 +354,6 @@ int main(int argc, char *argv[]){
     blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
 
     int new_dim = local0 + order - 1;
-    std::cout << "new_dim = " << new_dim << "\n";
     float *data = new (std::align_val_t(64)) float[new_dim * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(new_dim, nGrid, (nGrid+2)), blitz::deleteDataWhenDone);
     grid_data = 0.0;
@@ -367,7 +363,6 @@ int main(int argc, char *argv[]){
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
     start_time = std::chrono::high_resolution_clock::now();
-    std::cout << "Assigning mass to the grid using order " << order << std::endl;
     //for (int i = 0; i < 10; ++i) {
     //    std::cout << "particle i = " << rsorted(i,0);
     //}
@@ -380,8 +375,8 @@ int main(int argc, char *argv[]){
         upperbound = COMM_SLAB_START[i_rank + 1];
     }
     upperboundary = (float) upperbound / nGrid;
-    std::cout << "i_rank = " << i_rank << " upperboundary = " << upperboundary << "\n";
-    std::cout << "i_start = " << i_start << " i_start + total_num_particles_to_recv = " << i_start + total_num_particles_to_recv << "\n";
+    printf("i_rank = %d upperboundary = %d\n", i_rank, upperboundary);    
+    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv);    
     #pragma omp parallel for
     for (int pn = i_start; pn < i_start + total_num_particles_to_recv ; ++pn)
     {
