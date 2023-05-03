@@ -309,6 +309,8 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < N_rank; i++) {
         MPISendCount[i] = (num_particles_to_send[i] * 3);
         MPIRecvCount[i] = (num_particles_to_recv[i] * 3);
+        assert (MPISendCount[i] >= 0);
+        assert (MPIRecvCount[i] >= 0);
     }
 
     int* MPISendOffset = new int [N_rank];
