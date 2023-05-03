@@ -281,8 +281,8 @@ int main(int argc, char *argv[]){
             printf("r(i, 0) + 0.5 = %f r(i+1, 0) + 0.5 = %f\n", r(i, 0) + 0.5, r(i+1, 0) + 0.5);
             printf("particle_rank = %d next_particle_rank = %d\n", particle_rank, next_particle_rank);
             printf("i = %d i_start = %d i_end = %d\n", i, i_start, i_end);
-            printf("will be cut at %d\n", i-i_start);
-            slab_cut_indexes[counter] = i+1-i_start; 
+            printf("will be cut at %d\n", i+1); //i+1-i_start
+            slab_cut_indexes[counter] = i+1; 
             counter++;
         }}
     for (int i = 0; i < N_rank; ++i){printf("slab_cut_index for rank = %d is = %d\n", i_rank, slab_cut_indexes[i]);}
