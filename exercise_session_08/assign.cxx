@@ -333,8 +333,8 @@ int main(int argc, char *argv[]){
     delete [] num_particles_to_recv;
     blitz::Array<float, 2> rsorted(r_sorted, blitz::shape(total_num_particles_to_recv,3), blitz::deleteDataWhenDone);
     printf("Shape of r: (%d, %d)\n", rsorted.shape()[0], rsorted.shape()[1]);
-    printf("Start index of r: %d\n", rsorted.lbound());
-    printf("End index of r: %d\n", rsorted.ubound());
+    blitz::printf("Start index of r: %d\n", rsorted.lbound());
+    //printf("End index of r: %d\n", rsorted.ubound());
     printf("Sum of r: %f\n", blitz::sum(rsorted));
 
     int new_dim = local0 + order - 1;
