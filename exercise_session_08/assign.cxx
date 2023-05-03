@@ -392,101 +392,101 @@ int main(int argc, char *argv[]){
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
+    //std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
     //std::cout << "Mass assignment took " << std::setw(9) << diff_assignment.count() << " s\n";
 
 
-        // Simple test
-    printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
+    //    // Simple test
+    //printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
 
-    if (i_rank == 0)
-    {
-        MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-    else
-    {
-        MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
+    //if (i_rank == 0)
+    //{
+    //    MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //}
+    //else
+    //{
+    //    MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //}
 
-    if (i_rank == 0)
-    {
-        // Simple test
-        std::cout << "Sum of all grid mass = " << blitz::sum(grid) << std::endl;
-    }
-//        project_grid(grid, nGrid, out_filename);
+    //if (i_rank == 0)
+    //{
+    //    // Simple test
+    //    std::cout << "Sum of all grid mass = " << blitz::sum(grid) << std::endl;
+    //}
+                                                                                                //        project_grid(grid, nGrid, out_filename);
 
-//        // Convert to overdensity
-    float grid_sum = sum(grid);
-    float mean_density = grid_sum / (nGrid * nGrid * nGrid);
-    grid = (grid - mean_density) / mean_density;
+                                                                                                //        // Convert to overdensity
+    //float grid_sum = sum(grid);
+    //float mean_density = grid_sum / (nGrid * nGrid * nGrid);
+    //grid = (grid - mean_density) / mean_density;
 
-//        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
-    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
-//        
-    std::cout << "Plan created" << std::endl;
-    fftwf_execute(plan);
-    std::cout << "Plan executed" << std::endl;
-    fftwf_destroy_plan(plan);
-    std::cout << "Plan destroyed" << std::endl;
-//        // Linear binning is 1
-//        // Variable binning is 2
-//        // Log binning is 3
-    const int binning = 2;
-    int n_bins = 80;
-    if (binning == 1)
-    {
-        n_bins = nGrid;
-    }
-    std::vector<float> fPower(n_bins, 0.0);
-    std::vector<int> nPower(n_bins, 0);
-    float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
+                                                                                                //        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
+    //fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
+                                                                                                //        
+    //std::cout << "Plan created" << std::endl;
+    //fftwf_execute(plan);
+    //std::cout << "Plan executed" << std::endl;
+    //fftwf_destroy_plan(plan);
+    //std::cout << "Plan destroyed" << std::endl;
+                                                                                                //        // Linear binning is 1
+                                                                                                //        // Variable binning is 2
+                                                                                                //        // Log binning is 3
+    //const int binning = 2;
+    //int n_bins = 80;
+    //if (binning == 1)
+    //{
+    //    n_bins = nGrid;
+    //}
+    //std::vector<float> fPower(n_bins, 0.0);
+    //std::vector<int> nPower(n_bins, 0);
+    //float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
 
-    // loop over δ(k) and compute k from kx, ky and kz
-    for (int i = 0; i < nGrid; i++)
-    {
-        int kx = k_indx(i, nGrid);
-        //int kx = k_indx(i, nGrid);
-        for (int j = 0; j < nGrid; j++)
-        {
-            int ky = k_indx(j, nGrid);
-            for (int l = 0; l < nGrid / 2 + 1; l++)
-            {
-                int kz = l;
+    //// loop over δ(k) and compute k from kx, ky and kz
+    //for (int i = 0; i < nGrid; i++)
+    //{
+    //    int kx = k_indx(i, nGrid);
+    //    //int kx = k_indx(i, nGrid);
+    //    for (int j = 0; j < nGrid; j++)
+    //    {
+    //        int ky = k_indx(j, nGrid);
+    //        for (int l = 0; l < nGrid / 2 + 1; l++)
+    //        {
+    //            int kz = l;
 
-                float k = sqrt(kx * kx + ky * ky + kz * kz);
-                int i_bin = get_i_bin(k, n_bins, nGrid, binning);
-                if (i_bin == fPower.size())
-                    i_bin--;
-                fPower[i_bin] += std::norm(kdata(i, j, l));
-                nPower[i_bin] += 1;
-            }
-        }
-    }
+    //            float k = sqrt(kx * kx + ky * ky + kz * kz);
+    //            int i_bin = get_i_bin(k, n_bins, nGrid, binning);
+    //            if (i_bin == fPower.size())
+    //                i_bin--;
+    //            fPower[i_bin] += std::norm(kdata(i, j, l));
+    //            nPower[i_bin] += 1;
+    //        }
+    //    }
+    //}
 
-    //MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    if (i_rank == 0)
-    {
-        MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-    else
-    {
-        MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-        if (i_rank == 0)
-    {
-        MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-    else
-    {
-        MPI_Reduce(nPower.data(), nullptr, nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
+    ////MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    ////MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //if (i_rank == 0)
+    //{
+    //    MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //}
+    //else
+    //{
+    //    MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //}
+    //    if (i_rank == 0)
+    //{
+    //    MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //}
+    //else
+    //{
+    //    MPI_Reduce(nPower.data(), nullptr, nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //}
 
-    if (i_rank == 0)
-    {
-        save_binning(binning, fPower, nPower);
-    }
-    
+    //if (i_rank == 0)
+    //{
+    //    save_binning(binning, fPower, nPower);
+    //}
+    //
 
 MPI_Finalize();
 }
