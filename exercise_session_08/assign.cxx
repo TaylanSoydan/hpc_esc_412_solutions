@@ -121,7 +121,6 @@ void save_binning(const int binning, std::vector<float> &fPower, std::vector<int
 
 void assign_mass(blitz::Array<float, 2> &r, int part_i_start, int part_i_end, int nGrid, blitz::Array<float, 3> &grid, int order = 1)
 {
-    // Loop over all cells for this assignment
     float cell_half = 0.5;
     std::cout << "Assigning mass to the grid using order " << order << std::endl;
 #pragma omp parallel for
@@ -458,62 +457,62 @@ int main(int argc, char *argv[]){
     //                                //        // Linear binning is 1
     //                                //        // Variable binning is 2
     //                                //        // Log binning is 3
-    //const int binning = 2;
-    //int n_bins = 80;
-    //if (binning == 1)
-    //{
-    //    n_bins = nGrid;
-    //}
-    //std::vector<float> fPower(n_bins, 0.0);
-    //std::vector<int> nPower(n_bins, 0);
-    //float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
+    const int binning = 2;
+    int n_bins = 80;
+    if (binning == 1)
+    {
+        n_bins = nGrid;
+    }
+    std::vector<float> fPower(n_bins, 0.0);
+    std::vector<int> nPower(n_bins, 0);
+    float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
 
-    //// loop over δ(k) and compute k from kx, ky and kz
-    //for (int i = 0; i < nGrid; i++)
-    //{
-    //    int kx = k_indx(i, nGrid);
-    //    //int kx = k_indx(i, nGrid);
-    //    for (int j = 0; j < nGrid; j++)
-    //    {
-    //        int ky = k_indx(j, nGrid);
-    //        for (int l = 0; l < nGrid / 2 + 1; l++)
-    //        {
-    //            int kz = l;
+    // loop over δ(k) and compute k from kx, ky and kz
+    for (int i = 0; i < nGrid; i++)
+    {
+        int kx = k_indx(i, nGrid);
+        //int kx = k_indx(i, nGrid);
+        for (int j = 0; j < nGrid; j++)
+        {
+            int ky = k_indx(j, nGrid);
+            for (int l = 0; l < nGrid / 2 + 1; l++)
+            {
+                int kz = l;
 
-    //            float k = sqrt(kx * kx + ky * ky + kz * kz);
-    //            int i_bin = get_i_bin(k, n_bins, nGrid, binning);
-    //            if (i_bin == fPower.size())
-    //                i_bin--;
-    //            fPower[i_bin] += std::norm(kdata(i, j, l));
-    //            nPower[i_bin] += 1;
-    //        }
-    //    }
-    //}
+                float k = sqrt(kx * kx + ky * ky + kz * kz);
+                int i_bin = get_i_bin(k, n_bins, nGrid, binning);
+                if (i_bin == fPower.size())
+                    i_bin--;
+                fPower[i_bin] += std::norm(kdata(i, j, l));
+                nPower[i_bin] += 1;
+            }
+        }
+    }
 
-    ////MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    ////MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //if (i_rank == 0)
-    //{
-    //    MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //}
-    //else
-    //{
-    //    MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //}
-    //    if (i_rank == 0)
-    //{
-    //    MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //}
-    //else
-    //{
-    //    MPI_Reduce(nPower.data(), nullptr, nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-    //}
+    //MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    //MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (i_rank == 0)
+    {
+        MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
+        if (i_rank == 0)
+    {
+        MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        MPI_Reduce(nPower.data(), nullptr, nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    }
 
-    //if (i_rank == 0)
-    //{
-    //    save_binning(binning, fPower, nPower);
-    //}
-    //
+    if (i_rank == 0)
+    {
+        save_binning(binning, fPower, nPower);
+    }
+        //
 
 MPI_Finalize();
 }
