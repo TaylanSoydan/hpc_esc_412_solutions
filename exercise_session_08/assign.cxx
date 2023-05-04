@@ -357,9 +357,9 @@ int main(int argc, char *argv[]){
     //grid = 1.0;
     //std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     //blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
-    blitz::Range dim1(10,14);
-    blitz::Range dim2(0,nGrid);
-    blitz::Range dim3(0,nGrid); 
+    blitz::Range dim1(start0,start0+local0-1);
+    blitz::Range dim2(0,nGrid-1);
+    blitz::Range dim3(0,nGrid-1); 
     blitz::GeneralArrayStorage<3> storage;
     blitz::Array<float,3> grid(dim1,dim2,dim3,storage);
 
