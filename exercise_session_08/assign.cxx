@@ -358,8 +358,8 @@ int main(int argc, char *argv[]){
     //blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
     blitz::GeneralArrayStorage<3> storage;
     storage.base() = start0, 0, 0;
-    blitz::Array<float, 3> grid_data(data, blitz::shape(int(local0), nGrid, nGrid), blitz::deleteDataWhenDone, storage);
-    blitz::Array<float, 3> grid = grid_data(blitz::Range(start0, std::min(int(start0 + local0) - 1, nGrid - 1)), blitz::Range(0, nGrid - 1), blitz::Range(0, nGrid - 1));
+    blitz::Array<float, 3> grid_data(data, blitz::shape(int(new_dim), nGrid, nGrid), blitz::deleteDataWhenDone, storage);
+    blitz::Array<float, 3> grid = grid_data(blitz::Range(start0, std::min(int(start0 + new_dim) - 1, nGrid - 1)), blitz::Range(0, nGrid - 1), blitz::Range(0, nGrid - 1));
     grid = 0.0;
     start_time = std::chrono::high_resolution_clock::now();
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
@@ -393,7 +393,7 @@ int main(int argc, char *argv[]){
         float rx = (x + 0.5) * nGrid;
         float ry = (y + 0.5) * nGrid;
         float rz = (z + 0.5) * nGrid;
-
+        rx -= COMM_SLAB_START[i_rank]
       // precalculate Wx, Wy, Wz and return start index
         float Wx[order], Wy[order], Wz[order];
         int i_start = precalculate_W(Wx, order, rx);
@@ -500,7 +500,7 @@ int main(int argc, char *argv[]){
     {
         MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     }
-        if (i_rank == 0)
+    if (i_rank == 0)
     {
         MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     }
