@@ -362,7 +362,7 @@ int main(int argc, char *argv[]){
     blitz::Range dim3(0,nGrid-1); 
     blitz::GeneralArrayStorage<3> storage;
     blitz::Array<float,3> grid(dim1,dim2,dim3,storage);
-
+    grid = 0.0;
     start_time = std::chrono::high_resolution_clock::now();
     //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
     //int upperbound;
@@ -382,43 +382,43 @@ int main(int argc, char *argv[]){
     printf("Shape of grid: (%d, %d, %d)\n", grid.shape()[0], grid.shape()[1], grid.shape()[2]);
     printf("Start indices of grid: (%d, %d, %d)\n", grid.lbound(0), grid.lbound(1),grid.lbound(2));
     printf("End indices of grid: (%d, %d, %d)\n", grid.ubound(0), grid.ubound(1),grid.ubound(2));
-    //#pragma omp parallel for
-    //for (int pn = 0; pn < total_num_particles_to_recv; pn++)
-    //{
-    //    float x = rsorted(pn, 0);
-    //    float y = rsorted(pn, 1);
-    //    float z = rsorted(pn, 2);
+    #pragma omp parallel for
+    for (int pn = 0; pn < total_num_particles_to_recv; pn++)
+    {
+        float x = rsorted(pn, 0);
+        float y = rsorted(pn, 1);
+        float z = rsorted(pn, 2);
 
-    //    float rx = (x + 0.5) * nGrid;
-    //    float ry = (y + 0.5) * nGrid;
-    //    float rz = (z + 0.5) * nGrid;
+        float rx = (x + 0.5) * nGrid;
+        float ry = (y + 0.5) * nGrid;
+        float rz = (z + 0.5) * nGrid;
 
-    //    //// precalculate Wx, Wy, Wz and return start index
-    //    float Wx[order], Wy[order], Wz[order];
-    //    int i_start = precalculate_W(Wx, order, rx);
-    //    int j_start = precalculate_W(Wy, order, ry);
-    //    int k_start = precalculate_W(Wz, order, rz);
+      // precalculate Wx, Wy, Wz and return start index
+        float Wx[order], Wy[order], Wz[order];
+        int i_start = precalculate_W(Wx, order, rx);
+        int j_start = precalculate_W(Wy, order, ry);
+        int k_start = precalculate_W(Wz, order, rz);
 
-    //    for (int i = i_start; i < i_start + order; i++)
-    //    {
-    //        for (int j = j_start; j < j_start + order; j++)
-    //        {
-    //            for (int k = k_start; k < k_start + order; k++)
-    //            {
-    //                float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
-    //                assert (i < 100);
-    //                assert (j < 100);
-    //                assert (k < 100);
-    //                assert (i >= 0);
-    //                assert (j >= 0);
-    //                assert (k >= 0);
-    //                //printf("i,j,k = %d,%d,%d",i,j,k);
-    //                // Deposit the mass onto grid(i,j,k)
-    //                #pragma omp atomic
-    //                //grid(i,j,k) += W_res;
-    //                grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
-    //            }}}
-    //}
+        for (int i = i_start; i < i_start + order; i++)
+        {
+            for (int j = j_start; j < j_start + order; j++)
+            {
+                for (int k = k_start; k < k_start + order; k++)
+                {
+                    float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
+                    assert (i < 100);
+                    assert (j < 100);
+                    assert (k < 100);
+                    assert (i >= 0);
+                    assert (j >= 0);
+                    assert (k >= 0);
+                    //printf("i,j,k = %d,%d,%d",i,j,k);
+                    //Deposit the mass onto grid(i,j,k)
+                    #pragma omp atomic
+                    grid(i,j,k) += W_res;
+                    //grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
+                }}}
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -429,15 +429,15 @@ int main(int argc, char *argv[]){
 
 
     //    // Simple test
-    //printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
+    printf("For rank = %d sum of mass = %f\n", i_rank, blitz::sum(grid));
 
-    //if (i_rank == 0)
-    //{MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
-    //else
-    //{MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
+    if (i_rank == 0)
+    {MPI_Reduce(MPI_IN_PLACE, grid.data(), grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
+    else
+    {MPI_Reduce(grid.data(), nullptr, grid.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);}
 
-    //if (i_rank == 0)
-    //{printf("Sum of all grid mass = %f \n", blitz::sum(grid));}
+    if (i_rank == 0)
+    {printf("Sum of all grid mass = %f \n", blitz::sum(grid));}
     //                                //        project_grid(grid, nGrid, out_filename);
 
     //                                //        // Convert to overdensity
