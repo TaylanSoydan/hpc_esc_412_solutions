@@ -354,19 +354,16 @@ int main(int argc, char *argv[]){
     printf("i_rank = %d start0 = %ld local0 = %ld", i_rank, start0, local0 );
     float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)];
     blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
-    grid_data = 0.0;
-    blitz::Range dim1(0,50);
-    blitz::Range dim2(0,100);
-    blitz::Range dim3(0,100);    
+    grid_data = 1.0;
+    blitz::Range dim1(1,5);
+    blitz::Range dim2(1,10);
+    blitz::Range dim3(1,10);    
     blitz::GeneralArrayStorage<3> storage;
     blitz::Array<float,3> grid(storage);
     grid = grid_data(dim1,dim2,dim3);
-
     //blitz::Array<float, 3> grid = grid_data(blitz::Range(10,20), blitz::Range::all(), blitz::Range(0, nGrid - 1));
-
-
     //blitz::Range(start0, start0 + local0 - 1), 
-    grid = 0.0;
+    grid = 1.0;
     //std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     //blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
