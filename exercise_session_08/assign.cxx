@@ -344,7 +344,7 @@ int main(int argc, char *argv[]){
       //  printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
     //}
 
-    //int new_dim = local0 + order - 1;
+    int new_dim = local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
     //blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
     //grid_data = 0.0;
@@ -363,6 +363,8 @@ int main(int argc, char *argv[]){
     blitz::Array<float, 3> grid = grid_data(blitz::Range(start0, std::min(int(start0 + local0) - 1, nGrid - 1)), blitz::Range(0, nGrid - 1), blitz::Range(0, nGrid - 1));
     grid = 0.0;
     start_time = std::chrono::high_resolution_clock::now();
+    std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
+    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
     //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
     //int upperbound;
