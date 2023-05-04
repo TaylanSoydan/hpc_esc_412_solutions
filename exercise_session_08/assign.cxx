@@ -443,11 +443,11 @@ int main(int argc, char *argv[]){
 
     //                                //        // Convert to overdensity
     float grid_sum = sum(grid);
-    float mean_density = grid_sum / (nGrid * nGrid * nGrid);
+    float mean_density = grid_sum / (grid.shape()[0] * grid.shape()[1] * grid.shape()[2]);
     grid = (grid - mean_density) / mean_density;
 
     //                                //        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
-    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
+    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(local0, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
     //                                //        
     std::cout << "Plan created" << std::endl;
     fftwf_execute(plan);
