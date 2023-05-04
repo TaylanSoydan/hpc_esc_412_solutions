@@ -417,8 +417,8 @@ int main(int argc, char *argv[]){
                     //printf("i,j,k = %d,%d,%d",i,j,k);
                     //Deposit the mass onto grid(i,j,k)
                     #pragma omp atomic
-                    grid(i,j,k) += W_res;
-                    //grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
+                    //grid(i,j,k) += W_res;
+                    grid(wrap_edge(i, nGrid), wrap_edge(j, nGrid), wrap_edge(k, nGrid)) += W_res; //std::ceil(upperboundary)
                 }}}
     }
 
@@ -443,17 +443,18 @@ int main(int argc, char *argv[]){
     //                                //        project_grid(grid, nGrid, out_filename);
 
     //                                //        // Convert to overdensity
-    //float grid_sum = sum(grid);
-    //float mean_density = grid_sum / (nGrid * nGrid * nGrid);
-    //grid = (grid - mean_density) / mean_density;
+    float grid_sum = sum(grid);
+    float mean_density = grid_sum / (nGrid * nGrid * nGrid);
+    grid = (grid - mean_density) / mean_density;
 
     //                                //        //fftwf_plan plan = fftwf_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, FFTW_ESTIMATE);
-    //fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
+    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD,FFTW_ESTIMATE);
     //                                //        
     //std::cout << "Plan created" << std::endl;
-    //fftwf_execute(plan);
+    printf("Plan created");
+    fftwf_execute(plan);
     //std::cout << "Plan executed" << std::endl;
-    //fftwf_destroy_plan(plan);
+    fftwf_destroy_plan(plan);
     //std::cout << "Plan destroyed" << std::endl;
     //                                //        // Linear binning is 1
     //                                //        // Variable binning is 2
