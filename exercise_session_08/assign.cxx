@@ -469,8 +469,9 @@ int main(int argc, char *argv[]){
 
     // loop over δ(k) and compute k from kx, ky and kz
     for (int i = start0; i < start0+local0; i++)
+    //for (int i = 0; i < nGrid; i++)
     {
-        int kx = k_indx(i, local0);
+        int kx = k_indx(i, nGrid);
         //int kx = k_indx(i, nGrid);
         for (int j = 0; j < nGrid; j++)
         {
