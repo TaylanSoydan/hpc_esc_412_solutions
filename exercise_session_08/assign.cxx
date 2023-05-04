@@ -393,7 +393,7 @@ int main(int argc, char *argv[]){
         float rx = (x + 0.5) * nGrid;
         float ry = (y + 0.5) * nGrid;
         float rz = (z + 0.5) * nGrid;
-        rx -= COMM_SLAB_START[i_rank]
+        rx -= COMM_SLAB_START[i_rank];
       // precalculate Wx, Wy, Wz and return start index
         float Wx[order], Wy[order], Wz[order];
         int i_start = precalculate_W(Wx, order, rx);
