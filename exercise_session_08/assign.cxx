@@ -218,13 +218,13 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank(MPI_COMM_WORLD, &i_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &N_rank);
 
-    int sender_color = rank / 2;
-    int sender_key = rank ^ 1;
+    int sender_color = i_rank / 2;
+    int sender_key = i_rank ^ 1;
     MPI_Comm sender_comm;
     MPI_Comm_split(MPI_COMM_WORLD, sender_color, sender_key, &sender_comm);
 
-    int receiver_color = (rank + 1) / 2;
-    int receiver_key = rank;
+    int receiver_color = (i_rank + 1) / 2;
+    int receiver_key = i_rank;
     MPI_Comm receiver_comm;
     MPI_Comm_split(MPI_COMM_WORLD, receiver_color, receiver_key, &receiver_comm);
 
