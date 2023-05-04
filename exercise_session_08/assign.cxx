@@ -359,7 +359,7 @@ int main(int argc, char *argv[]){
 	blitz::Range dim2(0,19);
 	blitz::Range dim3(0,19);	
 	blitz::GeneralArrayStorage<3> storage;
-	blitz::Array<int,3> grid = grid_data(dim1,dim2,dim3,storage);
+	blitz::Array<float,3> grid = grid_data(dim1,dim2,dim3,storage);
     //blitz::Array<float, 3> grid = grid_data(blitz::Range(10,20), blitz::Range::all(), blitz::Range(0, nGrid - 1));
 
 
