@@ -366,11 +366,11 @@ int main(int argc, char *argv[]){
     grid = 1.0;
     //std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     //blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
-    blitz::Range dim1(10,14);
-    blitz::Range dim2(0,19);
-    blitz::Range dim3(0,19); 
-    blitz::GeneralArrayStorage<3> storage;
-    blitz::Array<int,3> A(dim1,dim2,dim3,storage);
+    blitz::Range dim11(10,14);
+    blitz::Range dim22(0,19);
+    blitz::Range dim33(0,19); 
+    blitz::GeneralArrayStorage<3> storage2;
+    blitz::Array<int,3> A(dim11,dim22,dim33,storage2);
     printf("Shape of A: (%d, %d, %d)\n", A.shape()[0], A.shape()[1], A.shape()[2]);
     printf("Start indices of A: (%d, %d, %d)\n", A.lbound(0), A.lbound(1),A.lbound(2));
     printf("End indices of A: (%d, %d, %d)\n", A.ubound(0), A.ubound(1),A.ubound(2));
