@@ -356,10 +356,12 @@ int main(int argc, char *argv[]){
     blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
     grid_data = 0.0;
     blitz::Range dim1(10,14);
-	blitz::Range dim2(0,19);
-	blitz::Range dim3(0,19);	
-	blitz::GeneralArrayStorage<3> storage;
-	blitz::Array<float,3> grid = grid_data(dim1,dim2,dim3,storage);
+    blitz::Range dim2(0,19);
+    blitz::Range dim3(0,19);    
+    blitz::GeneralArrayStorage<3> storage;
+    blitz::Array<float,3> grid(storage);
+    grid = grid_data(dim1,dim2,dim3);
+
     //blitz::Array<float, 3> grid = grid_data(blitz::Range(10,20), blitz::Range::all(), blitz::Range(0, nGrid - 1));
 
 
