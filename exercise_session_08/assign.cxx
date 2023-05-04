@@ -218,6 +218,16 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank(MPI_COMM_WORLD, &i_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &N_rank);
 
+    int sender_color = rank / 2;
+    int sender_key = rank ^ 1;
+    MPI_Comm sender_comm;
+    MPI_Comm_split(MPI_COMM_WORLD, sender_color, sender_key, &sender_comm);
+
+    int receiver_color = (rank + 1) / 2;
+    int receiver_key = rank;
+    MPI_Comm receiver_comm;
+    MPI_Comm_split(MPI_COMM_WORLD, receiver_color, receiver_key, &receiver_comm);
+
     ptrdiff_t alloc_local, local0, start0;
     fftw_mpi_init();
     alloc_local = fftw_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
@@ -339,10 +349,6 @@ int main(int argc, char *argv[]){
     printf("Start indices of r: (%d, %d)\n", r.lbound(0), r.lbound(1));
     printf("End indices of r: (%d, %d)\n", r.ubound(0), r.ubound(1));
 
-    //for (int i = 0; i < 50; i++){
-      //  printf("rsorted x at %d is %f \n",i*10000, rsorted(i*10000,0));
-    //}
-
     int new_dim = local0 + order - 1;
     float *data = new (std::align_val_t(64)) float[nGrid * nGrid * (nGrid+2)]; //float[nGrid * nGrid * (nGrid + 2)];
     //blitz::Array<float, 3> grid_data(data, blitz::shape(nGrid/2, nGrid, nGrid), blitz::deleteDataWhenDone);
@@ -366,19 +372,6 @@ int main(int argc, char *argv[]){
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(new_dim, nGrid, nGrid / 2 + 1));
 
     //assign_mass(rsorted, i_start, i_end, nGrid, grid, order);
-    //int upperbound;
-    //    float upperboundary;
-    //    if (i_rank == N_rank - 1) {
-    //        upperbound = nGrid;
-    //    } else {
-    //        upperbound = COMM_SLAB_START[i_rank + 1];
-    //    }
-    //    upperboundary = (float) upperbound / nGrid;
-    //    printf("i_rank = %d upperboundary = %f\n", i_rank, upperboundary);    
-    //    printf("i_start = %d i_start + total_num_particles_to_recv = %d\n", i_start, i_start + total_num_particles_to_recv); 
-    //printf("Shape of grid_data: (%d, %d, %d)\n", grid_data.shape()[0], grid_data.shape()[1], grid_data.shape()[2]);
-    //printf("Start indices of grid_data: (%d, %d, %d)\n", grid_data.lbound(0), grid_data.lbound(1),grid_data.lbound(2));
-    //printf("End indices of grid_data: (%d, %d, %d)\n", grid_data.ubound(0), grid_data.ubound(1),grid_data.ubound(2));
 
     printf("Shape of grid: (%d, %d, %d)\n", grid.shape()[0], grid.shape()[1], grid.shape()[2]);
     printf("Start indices of grid: (%d, %d, %d)\n", grid.lbound(0), grid.lbound(1),grid.lbound(2));
@@ -393,7 +386,6 @@ int main(int argc, char *argv[]){
         float rx = (x + 0.5) * nGrid;
         float ry = (y + 0.5) * nGrid;
         float rz = (z + 0.5) * nGrid;
-        rx -= COMM_SLAB_START[i_rank];
       // precalculate Wx, Wy, Wz and return start index
         float Wx[order], Wy[order], Wz[order];
         int i_start = precalculate_W(Wx, order, rx);
@@ -407,12 +399,7 @@ int main(int argc, char *argv[]){
                 for (int k = k_start; k < k_start + order; k++)
                 {
                     float W_res = Wx[i - i_start] * Wy[j - j_start] * Wz[k - k_start];
-                    assert (i < 100);
-                    assert (j < 100);
-                    assert (k < 100);
-                    assert (i >= 0);
-                    assert (j >= 0);
-                    assert (k >= 0);
+
                     //printf("i,j,k = %d,%d,%d",i,j,k);
                     //Deposit the mass onto grid(i,j,k)
                     #pragma omp atomic
@@ -422,7 +409,10 @@ int main(int argc, char *argv[]){
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    MPI_Request send_request, recv_request;
+    MPI_Ireduce(send_buffer, recv_buffer, MPISendCount, MPI_FLOAT, MPI_SUM, 0, receiver_comm, &send_request);
+    MPI_Ireduce(recv_buffer, send_buffer, MPIRecvCount, MPI_FLOAT, MPI_SUM, 0, sender_comm, &recv_request);
+    MPI_Waitall(2, (MPI_Request[]) {&send_request, &recv_request}, MPI_STATUSES_IGNORE);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
