@@ -468,9 +468,9 @@ int main(int argc, char *argv[]){
     float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
 
     // loop over δ(k) and compute k from kx, ky and kz
-    for (int i = 0; i < nGrid; i++)
+    for (int i = start0; i < start0+local0; i++)
     {
-        int kx = k_indx(i, nGrid);
+        int kx = k_indx(i, local0);
         //int kx = k_indx(i, nGrid);
         for (int j = 0; j < nGrid; j++)
         {
