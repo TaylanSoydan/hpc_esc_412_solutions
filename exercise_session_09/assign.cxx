@@ -152,7 +152,6 @@ void assign_mass(blitz::Array<float, 2> &r, int part_i_start, int part_i_end, in
 
 void project_grid(blitz::Array<float, 3> &grid, int nGrid, const char *out_filename)
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
     blitz::Array<float, 2> projected(nGrid, nGrid);
     for (int i = 0; i < nGrid; ++i)
     {
@@ -161,8 +160,6 @@ void project_grid(blitz::Array<float, 3> &grid, int nGrid, const char *out_filen
             projected(i, j) = max(grid(i, j, blitz::Range::all()));
         }
     }
-    std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start_time;
-    std::cout << "Projection took " << std::setw(9) << diff.count() << " s\n";
 
     std::ofstream f(out_filename);
     for (int i = 0; i < nGrid; ++i)
@@ -244,8 +241,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    auto start_time = std::chrono::high_resolution_clock::now();
-
     TipsyIO io;
     io.open(argv[1]);
     if (io.fail())
@@ -263,8 +258,6 @@ int main(int argc, char *argv[])
     std::cerr << "Loading " << N_per << " particles" << std::endl;
     blitz::Array<float, 2> r(blitz::Range(i_start, i_end - 1), blitz::Range(0, 2));
     io.load(r);
-    std::chrono::duration<double> diff_load = std::chrono::high_resolution_clock::now() - start_time;
-    std::cout << "Reading file took " << std::setw(9) << diff_load.count() << " s\n";
 
     particle *prows = reinterpret_cast<particle *>(r.data());
     std::sort(prows, prows + r.rows(), compare_particles);
@@ -359,11 +352,8 @@ int main(int argc, char *argv[])
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
     blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(grid_end - grid_start, nGrid, nGrid / 2 + 1));
     std::cout << kdata.base() << std::endl;
-    start_time = std::chrono::high_resolution_clock::now();
     assign_mass(r_local, 0, part_count, nGrid, grid, order, grid_start, grid_end);
     printf("[Rank %d] Grid sum after mass assignment = %f\n", i_rank, sum(grid));
-    std::chrono::duration<double> diff_assignment = std::chrono::high_resolution_clock::now() - start_time;
-    printf("[Rank %d] Mass assignment took %fs\n", i_rank, diff_assignment.count());
 
     MPI_Request req[3];
     // First split the MPI_COMM_WORLD communicator into (0,1), (2,3), (4,5)
