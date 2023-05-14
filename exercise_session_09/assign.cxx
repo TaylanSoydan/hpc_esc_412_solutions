@@ -223,7 +223,8 @@ int main(int argc, char *argv[])
     // Init FFTW
     fftwf_mpi_init();
     ptrdiff_t start0, local0;
-    auto alloc_local = fftwf_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
+    // auto alloc_local = fftwf_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
+    auto alloc_local = fftw_mpi_local_size_3d_transposed(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
 
     // Collect all start0 and local0
     std::vector<int> all_start0(N_rank);
@@ -433,7 +434,8 @@ int main(int argc, char *argv[])
     // Overdensity
     grid = grid - 1;
 
-    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD, FFTW_ESTIMATE);
+    //fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD, FFTW_ESTIMATE);
+    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD, FFTW_MPI_TRANSPOSED_OUT | FFTW_ESTIMATE);
 
     printf("[Rank %d] Plan created\n", i_rank);
     fftwf_execute(plan);
