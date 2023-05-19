@@ -226,15 +226,13 @@ int main(int argc, char *argv[])
     // auto alloc_local = fftwf_mpi_local_size_3d(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0);
     //EX1
     //auto alloc_local = fftw_mpi_local_size_3d_transposed(nGrid, nGrid, nGrid, MPI_COMM_WORLD, &local0, &start0, &local1, &start1);
+    ptrdiff_t dim[2] = {nGrid, nGrid}
+    
 
     //EX2
-    ptrdiff_t fftw_mpi_local_size_many_transposed (
-    int 2 , const ptrdiff_t *n, ptrdiff_t N ,
-    ptrdiff_t FFTW_MPI_DEFAULT_BLOCK , ptrdiff_t FFTW_MPI_DEFAULT_BLOCK , MPI_Comm comm ,
-    ptrdiff_t * local0 , ptrdiff_t * start0 ,
-    ptrdiff_t * local1 , ptrdiff_t * start1 );
-
-
+    auto alloc_local = fftwf_mpi_local_size_many_transposed(2,dim,nGrid+2, FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK,
+    MPI_COMM_WORLD ,&local0 , &start0 ,&local1 , &start1)
+    
     // Collect all start0 and local0
     std::vector<int> all_start0(N_rank);
     std::vector<int> all_local0(N_rank);
@@ -443,16 +441,45 @@ int main(int argc, char *argv[])
     // Overdensity
     grid = grid - 1;
 
-    //fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD, FFTW_ESTIMATE);
-    fftwf_plan plan = fftwf_mpi_plan_dft_r2c_2d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD, FFTW_MPI_TRANSPOSED_OUT | FFTW_ESTIMATE);
-
-
+    //fftwf_plan plan = fftwf_mpi_plan_dft_r2c_3d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD, FFTW_MPI_TRANSPOSED_OUT | FFTW_ESTIMATE);
+    fftwf_plan plan2d = fftwf_mpi_plan_dft_r2c_2d(nGrid, nGrid, nGrid, data, (fftwf_complex *)complex_data, MPI_COMM_WORLD, FFTW_ESTIMATE);
 
     printf("[Rank %d] Plan created\n", i_rank);
-    fftwf_execute(plan);
+    for (int i; i<grid_end - grid_start - order; i++) {
+        float* in = &grid(i,0,0);
+        fftw_complex* out = reinterpret_cast<fftwf_complex>(&data(i,0,0))
+        fftw_execute_dft_r2c(plan2d, in, out);
+    }
+
+    fftwf_destroy_plan(plan2d);
+
+    fftwf_plan planT = fftw_mpi_plan_many_transpose(nGrid, nGrid, nGrid+2,FFTW_MPI_DEFAULT_BLOCK,FFTW_MPI_DEFAULT_BLOCK,grid.data(),grid.data(),MPI_COMM_WORLD,FFTW_ESTIMATE)
+
+    fftwf_execute(planT);
     printf("[Rank %d] Plan executed\n", i_rank);
-    fftwf_destroy_plan(plan);
+    fftwf_destroy_plan(planT);
     printf("[Rank %d] Plan destroyed\n", i_rank);
+
+
+    blitz::Array<std::complex<float>,3> kdata(complex_data,blitz::shape(nGrid, grid_end, grid_start - order, nGrid/2 + 1));
+    fftwf_complex* input1d = reinterpret_cast<fftw_complex*>(kdata.data());
+    int rank = 1;
+    int n[1] = {nGrid};
+    int howmany = nGrid / 2 + 1;
+    int idist = 1;
+    int odist = 1;
+    int istride = nGrid / 2 + 1;
+    int ostride = nGrid / 2 + 1;
+    int* inembed = n;
+    int* onembed = n;
+
+    fftw_plan plan1d = fftw_plan_many_dft(rank,n,howmany,input1d, inembed, istride, idist, input1d, onembed, ostride, odist, FFTW_FORWARD,FFTW_ESTIMATE);
+    for (int i = 0; i < grid_end - grid_start - order; i++) {
+        fftw_complex* in = reinterpret_cast<fftw_complex*>(&kdata(0,i,0));
+        fftw_execute_dft(plan1d, in, in);
+    }
+
+    printf("1d fft done\n");
 
     // Linear binning is 1
     // Variable binning is 2
