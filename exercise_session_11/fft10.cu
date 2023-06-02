@@ -25,237 +25,237 @@ void fill_array(Array<float, 2> &data) {
 bool validate(Array<float, 2> &data, Array<std::complex<float>, 2> kdata) {
     Array<float, 2> rdata(data.extent());
     fftwf_plan plan = fftwf_plan_dft_c2r_2d(data.rows(), data.cols(),
-                                           reinterpret_cast<fftwf_complex *>(kdata.data()), rdata.data(), FFTW_ESTIMATE);
+    //               reinterpret_cast<fftwf_complex *>(kdata.data()), rdata.data(), FFTW_ESTIMATE);
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
     rdata /= data.size(); // Normalize for the FFT
     return all(abs(data - rdata) < 1e-5);
 }
+    // Ex1
+    //int main() {
+    //    int n = 10000;
 
-int main() {
-    int n = 10000;
+    //    // Out of place
+    //    Array<float, 2> rdata1(n, n);
+    //    Array<std::complex<float>, 2> kdata1(n, n / 2 + 1);
 
-    // Out of place
-    Array<float, 2> rdata1(n, n);
-    Array<std::complex<float>, 2> kdata1(n, n / 2 + 1);
+    //    fftwf_plan plan1 = fftwf_plan_dft_r2c_2d(n, n,
+    //        rdata1.data(), reinterpret_cast<fftwf_complex *>(kdata1.data()), FFTW_ESTIMATE);
 
-    fftwf_plan plan1 = fftwf_plan_dft_r2c_2d(n, n,
-        rdata1.data(), reinterpret_cast<fftwf_complex *>(kdata1.data()), FFTW_ESTIMATE);
+    //    fill_array(rdata1);
+    //    fftwf_execute(plan1);
+    //    fftwf_destroy_plan(plan1);
 
-    fill_array(rdata1);
-    fftwf_execute(plan1);
-    fftwf_destroy_plan(plan1);
+    //    std::cout << ">>> Out of place FFT " << (validate(rdata1, kdata1) ? "match" : "MISMATCH") << std::endl;
 
-    std::cout << ">>> Out of place FFT " << (validate(rdata1, kdata1) ? "match" : "MISMATCH") << std::endl;
+    //    // In-place
+    //    Array<float, 2> raw_data2(n, n + 2);
+    //    Array<float, 2> rdata2 = raw_data2(Range(0, n - 1), Range(0, n - 1));
 
-    // In-place
-    Array<float, 2> raw_data2(n, n + 2);
-    Array<float, 2> rdata2 = raw_data2(Range(0, n - 1), Range(0, n - 1));
+    //    fftwf_plan plan2 = fftwf_plan_dft_r2c_2d(n, n,
+    //        rdata2.data(), reinterpret_cast<fftwf_complex *>(rdata2.data()), FFTW_ESTIMATE);
 
-    fftwf_plan plan2 = fftwf_plan_dft_r2c_2d(n, n,
-        rdata2.data(), reinterpret_cast<fftwf_complex *>(rdata2.data()), FFTW_ESTIMATE);
+    //    fill_array(rdata2);
+    //    fftwf_execute(plan2);
+    //    fftwf_destroy_plan(plan2);
 
-    fill_array(rdata2);
-    fftwf_execute(plan2);
-    fftwf_destroy_plan(plan2);
+    //    Array<std::complex<float>, 2> kdata2(reinterpret_cast<std::complex<float> *>(rdata2.data()),
+    //        shape(n, n / 2 + 1), neverDeleteData);
 
-    Array<std::complex<float>, 2> kdata2(reinterpret_cast<std::complex<float> *>(rdata2.data()),
-        shape(n, n / 2 + 1), neverDeleteData);
+    //    std::cout << ">>> In-place FFT " << (validate(rdata1, kdata2) ? "match" : "MISMATCH") << std::endl;
 
-    std::cout << ">>> In-place FFT " << (validate(rdata1, kdata2) ? "match" : "MISMATCH") << std::endl;
+    //    // Transfer data3 to GPU and perform in-place FFT
+    //    Array<float, 2> raw_data3(n, n + 2);
+    //    Array<float, 2> data3 = raw_data3(blitz::Range::all(), blitz::Range(0, n - 1));
 
-    // Transfer data3 to GPU and perform in-place FFT
-    Array<float, 2> raw_data3(n, n + 2);
-    Array<float, 2> data3 = raw_data3(blitz::Range::all(), blitz::Range(0, n - 1));
+    //    fill_array(data3);
 
-    fill_array(data3);
+    //    size_t size_in_bytes = sizeof(float) * n * (n + 2);
 
-    size_t size_in_bytes = sizeof(float) * n * (n + 2);
+    //    // Allocate memory on the GPU
+    //    void *device_data;
+    //    cudaMalloc(&device_data, size_in_bytes);
 
-    // Allocate memory on the GPU
-    void *device_data;
-    cudaMalloc(&device_data, size_in_bytes);
+    //    // Copy data from CPU to GPU
+    //    cudaMemcpy(device_data, data3.data(), size_in_bytes, cudaMemcpyHostToDevice);
+    //    cudaDeviceSynchronize();
 
-    // Copy data from CPU to GPU
-    cudaMemcpy(device_data, data3.data(), size_in_bytes, cudaMemcpyHostToDevice);
-    cudaDeviceSynchronize();
+    //    cudaMemcpy(raw_data4.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost);
+    //    std::cout << (validate2d(raw_data3, raw_data4) ? "passed" : "failed") << std::endl;
 
-    cudaMemcpy(raw_data4.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost);
-    std::cout << (validate2d(raw_data3, raw_data4) ? "passed" : "failed") << std::endl;
+    //    cudaFree(device_data);
 
-    cudaFree(device_data);
+    //    // Perform in-place FFT on GPU
+    //    Array<float, 2> raw_data5(n, n + 2);
+    //    Array<float, 2> data5 = raw_data5(blitz::Range::all(), blitz::Range(0, n - 1));
+    //    Array<std::complex<float>, 2> data6(n, n / 2 + 1);
 
-    // Perform in-place FFT on GPU
-    Array<float, 2> raw_data5(n, n + 2);
-    Array<float, 2> data5 = raw_data5(blitz::Range::all(), blitz::Range(0, n - 1));
-    Array<std::complex<float>, 2> data6(n, n / 2 + 1);
+    //    float *device_data;
+    //    size_t size_in_byte = sizeof(float) * n * (n + 2);
+    //    cudaMalloc(&device_data, size_in_byte);
+    //    cudaMemcpy(device_data, raw_data5.data(), size_in_byte, cudaMemcpyHostToDevice);
+    //    cudaDeviceSynchronize();
 
-    float *device_data;
-    size_t size_in_byte = sizeof(float) * n * (n + 2);
-    cudaMalloc(&device_data, size_in_byte);
-    cudaMemcpy(device_data, raw_data5.data(), size_in_byte, cudaMemcpyHostToDevice);
-    cudaDeviceSynchronize();
+    //    int dims[2] = { n, n };
+    //    int inembed[2] = { n, n + 2 };
+    //    int onembed[2] = { n, n / 2 + 1 };
+    //    int batch = 1;
+    //    int odist = 1;
+    //    int idist = 2;
+    //    int istride = 1;
+    //    int ostride = 1;
 
-    int dims[2] = { n, n };
-    int inembed[2] = { n, n + 2 };
-    int onembed[2] = { n, n / 2 + 1 };
-    int batch = 1;
-    int odist = 1;
-    int idist = 2;
-    int istride = 1;
-    int ostride = 1;
+    //    cufftHandle plan;
+    //    cufftCreate(&plan);
+    //    cufftSetAutoAllocation(plan, CUFFT_NO_WORKSPACE);
+    //    cufftMakePlanMany(plan, 2, dims, inembed, istride, idist, onembed, ostride, odist, CUFFT_R2C, batch);
 
-    cufftHandle plan;
-    cufftCreate(&plan);
-    cufftSetAutoAllocation(plan, CUFFT_NO_WORKSPACE);
-    cufftMakePlanMany(plan, 2, dims, inembed, istride, idist, onembed, ostride, odist, CUFFT_R2C, batch);
+    //    size_t workSize;
+    //    cufftGetSize(plan, &workSize);
 
-    size_t workSize;
-    cufftGetSize(plan, &workSize);
+    //    void *workArea;
+    //    cudaMalloc(&workArea, workSize);
 
-    void *workArea;
-    cudaMalloc(&workArea, workSize);
+    //    cufftSetWorkArea(plan, workArea);
 
-    cufftSetWorkArea(plan, workArea);
+    //    cufftExecR2C(plan, reinterpret_cast<cufftReal *>(device_data),
+    //        reinterpret_cast<cufftComplex *>(device_data));
 
-    cufftExecR2C(plan, reinterpret_cast<cufftReal *>(device_data),
-        reinterpret_cast<cufftComplex *>(device_data));
+    //    cudaDeviceSynchronize();
+    //    cufftDestroy(plan);
 
-    cudaDeviceSynchronize();
-    cufftDestroy(plan);
+    //    // Copy data from GPU back to CPU
+    //    cudaMemcpy(data6.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost);
 
-    // Copy data from GPU back to CPU
-    cudaMemcpy(data6.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost);
+    //    // Synchronize GPU
+    //    cudaDeviceSynchronize();
 
-    // Synchronize GPU
-    cudaDeviceSynchronize();
+    //    // Compare data3 and data4
+    //    std::cout << ">>> Data Comparison " << (validate(data5, data6) ? "match" : "MISMATCH") << std::endl;
 
-    // Compare data3 and data4
-    std::cout << ">>> Data Comparison " << (validate(data5, data6) ? "match" : "MISMATCH") << std::endl;
+    //    // Free GPU memory
+    //    cudaFree(device_data);
+    //    cudaFree(workArea);
 
-    // Free GPU memory
-    cudaFree(device_data);
-    cudaFree(workArea);
+    //    return 0;
+    //}
+    // EX 2
+    //int main() {
+    //    int n = 10000;
 
-    return 0;
-}
+    //    // Create a new stream
+    //    cudaStream_t stream;
+    //    cudaStreamCreate(&stream);
 
-int main() {
-    int n = 10000;
+    //    // Out of place
+    //    Array<float, 2> rdata1(n, n);
+    //    Array<std::complex<float>, 2> kdata1(n, n / 2 + 1);
 
-    // Create a new stream
-    cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    //    fftwf_plan plan1 = fftwf_plan_dft_r2c_2d(n, n,
+    //        rdata1.data(), reinterpret_cast<fftwf_complex *>(kdata1.data()), FFTW_ESTIMATE);
 
-    // Out of place
-    Array<float, 2> rdata1(n, n);
-    Array<std::complex<float>, 2> kdata1(n, n / 2 + 1);
+    //    fill_array(rdata1);
+    //    fftwf_execute(plan1);
+    //    fftwf_destroy_plan(plan1);
 
-    fftwf_plan plan1 = fftwf_plan_dft_r2c_2d(n, n,
-        rdata1.data(), reinterpret_cast<fftwf_complex *>(kdata1.data()), FFTW_ESTIMATE);
+    //    std::cout << ">>> Out of place FFT " << (validate(rdata1, kdata1) ? "match" : "MISMATCH") << std::endl;
 
-    fill_array(rdata1);
-    fftwf_execute(plan1);
-    fftwf_destroy_plan(plan1);
+    //    // In-place
+    //    Array<float, 2> raw_data2(n, n + 2);
+    //    Array<float, 2> rdata2 = raw_data2(Range(0, n - 1), Range(0, n - 1));
 
-    std::cout << ">>> Out of place FFT " << (validate(rdata1, kdata1) ? "match" : "MISMATCH") << std::endl;
+    //    fftwf_plan plan2 = fftwf_plan_dft_r2c_2d(n, n,
+    //        rdata2.data(), reinterpret_cast<fftwf_complex *>(rdata2.data()), FFTW_ESTIMATE);
 
-    // In-place
-    Array<float, 2> raw_data2(n, n + 2);
-    Array<float, 2> rdata2 = raw_data2(Range(0, n - 1), Range(0, n - 1));
+    //    fill_array(rdata2);
+    //    fftwf_execute(plan2);
+    //    fftwf_destroy_plan(plan2);
 
-    fftwf_plan plan2 = fftwf_plan_dft_r2c_2d(n, n,
-        rdata2.data(), reinterpret_cast<fftwf_complex *>(rdata2.data()), FFTW_ESTIMATE);
+    //    Array<std::complex<float>, 2> kdata2(reinterpret_cast<std::complex<float> *>(rdata2.data()),
+    //        shape(n, n / 2 + 1), neverDeleteData);
 
-    fill_array(rdata2);
-    fftwf_execute(plan2);
-    fftwf_destroy_plan(plan2);
+    //    std::cout << ">>> In-place FFT " << (validate(rdata1, kdata2) ? "match" : "MISMATCH") << std::endl;
 
-    Array<std::complex<float>, 2> kdata2(reinterpret_cast<std::complex<float> *>(rdata2.data()),
-        shape(n, n / 2 + 1), neverDeleteData);
+    //    // Transfer data3 to GPU and perform in-place FFT
+    //    Array<float, 2> raw_data3(n, n + 2);
+    //    Array<float, 2> data3 = raw_data3(blitz::Range::all(), blitz::Range(0, n - 1));
 
-    std::cout << ">>> In-place FFT " << (validate(rdata1, kdata2) ? "match" : "MISMATCH") << std::endl;
+    //    fill_array(data3);
 
-    // Transfer data3 to GPU and perform in-place FFT
-    Array<float, 2> raw_data3(n, n + 2);
-    Array<float, 2> data3 = raw_data3(blitz::Range::all(), blitz::Range(0, n - 1));
+    //    size_t size_in_bytes = sizeof(float) * n * (n + 2);
 
-    fill_array(data3);
+    //    // Allocate memory on the GPU with the new stream
+    //    void *device_data;
+    //    cudaMallocAsync(&device_data, size_in_bytes, stream);
 
-    size_t size_in_bytes = sizeof(float) * n * (n + 2);
+    //    // Copy data from CPU to GPU with the new stream
+    //    cudaMemcpyAsync(device_data, data3.data(), size_in_bytes, cudaMemcpyHostToDevice, stream);
 
-    // Allocate memory on the GPU with the new stream
-    void *device_data;
-    cudaMallocAsync(&device_data, size_in_bytes, stream);
+    //    // Synchronize the new stream
+    //    cudaStreamSynchronize(stream);
 
-    // Copy data from CPU to GPU with the new stream
-    cudaMemcpyAsync(device_data, data3.data(), size_in_bytes, cudaMemcpyHostToDevice, stream);
+    //    cudaMemcpy(raw_data4.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost);
+    //    std::cout << (validate2d(raw_data3, raw_data4) ? "passed" : "failed") << std::endl;
 
-    // Synchronize the new stream
-    cudaStreamSynchronize(stream);
+    //    cudaFree(device_data);
 
-    cudaMemcpy(raw_data4.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost);
-    std::cout << (validate2d(raw_data3, raw_data4) ? "passed" : "failed") << std::endl;
+    //    // Perform in-place FFT on GPU
+    //    Array<float, 2> raw_data5(n, n + 2);
+    //    Array<float, 2> data5 = raw_data5(blitz::Range::all(), blitz::Range(0, n - 1));
+    //    Array<std::complex<float>, 2> data6(n, n / 2 + 1);
 
-    cudaFree(device_data);
+    //    float *device_data;
+    //    size_t size_in_byte = sizeof(float) * n * (n + 2);
+    //    cudaMallocAsync(&device_data, size_in_byte, stream);
+    //    cudaMemcpyAsync(device_data, raw_data5.data(), size_in_byte, cudaMemcpyHostToDevice, stream);
 
-    // Perform in-place FFT on GPU
-    Array<float, 2> raw_data5(n, n + 2);
-    Array<float, 2> data5 = raw_data5(blitz::Range::all(), blitz::Range(0, n - 1));
-    Array<std::complex<float>, 2> data6(n, n / 2 + 1);
+    //    // Create cuFFT plan
+    //    int dims[2] = { n, n };
+    //    int inembed[2] = { n, n + 2 };
+    //    int onembed[2] = { n, n / 2 + 1 };
+    //    int batch = 1;
+    //    int odist = 1;
+    //    int idist = 2;
+    //    int istride = 1;
+    //    int ostride = 1;
 
-    float *device_data;
-    size_t size_in_byte = sizeof(float) * n * (n + 2);
-    cudaMallocAsync(&device_data, size_in_byte, stream);
-    cudaMemcpyAsync(device_data, raw_data5.data(), size_in_byte, cudaMemcpyHostToDevice, stream);
+    //    cufftHandle plan;
+    //    cufftCreate(&plan);
+    //    cufftSetAutoAllocation(plan, CUFFT_NO_WORKSPACE);
+    //    cufftMakePlanMany(plan, 2, dims, inembed, istride, idist, onembed, ostride, odist, CUFFT_R2C, batch);
 
-    // Create cuFFT plan
-    int dims[2] = { n, n };
-    int inembed[2] = { n, n + 2 };
-    int onembed[2] = { n, n / 2 + 1 };
-    int batch = 1;
-    int odist = 1;
-    int idist = 2;
-    int istride = 1;
-    int ostride = 1;
+    //    // Set the stream and work area
+    //    cufftSetStream(plan, stream);
+    //    cufftSetWorkArea(plan, device_data);
 
-    cufftHandle plan;
-    cufftCreate(&plan);
-    cufftSetAutoAllocation(plan, CUFFT_NO_WORKSPACE);
-    cufftMakePlanMany(plan, 2, dims, inembed, istride, idist, onembed, ostride, odist, CUFFT_R2C, batch);
+    //    // Execute the cuFFT plan
+    //    cufftExecR2C(plan, reinterpret_cast<cufftReal *>(device_data),
+    //        reinterpret_cast<cufftComplex *>(device_data));
 
-    // Set the stream and work area
-    cufftSetStream(plan, stream);
-    cufftSetWorkArea(plan, device_data);
+    //    // Synchronize the stream
+    //    cudaStreamSynchronize(stream);
 
-    // Execute the cuFFT plan
-    cufftExecR2C(plan, reinterpret_cast<cufftReal *>(device_data),
-        reinterpret_cast<cufftComplex *>(device_data));
+    //    cufftDestroy(plan);
 
-    // Synchronize the stream
-    cudaStreamSynchronize(stream);
+    //    // Copy data from GPU back to CPU with the new stream
+    //    cudaMemcpyAsync(data6.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost, stream);
 
-    cufftDestroy(plan);
+    //    // Synchronize the new stream
+    //    cudaStreamSynchronize(stream);
 
-    // Copy data from GPU back to CPU with the new stream
-    cudaMemcpyAsync(data6.data(), device_data, size_in_bytes, cudaMemcpyDeviceToHost, stream);
+    //    // Compare data3 and data4
+    //    std::cout << ">>> Data Comparison " << (validate(data5, data6) ? "match" : "MISMATCH") << std::endl;
 
-    // Synchronize the new stream
-    cudaStreamSynchronize(stream);
+    //    // Free GPU memory
+    //    cudaFree(device_data);
 
-    // Compare data3 and data4
-    std::cout << ">>> Data Comparison " << (validate(data5, data6) ? "match" : "MISMATCH") << std::endl;
+    //    // Destroy the stream
+    //    cudaStreamDestroy(stream);
 
-    // Free GPU memory
-    cudaFree(device_data);
+    //    return 0;
+    //}
 
-    // Destroy the stream
-    cudaStreamDestroy(stream);
-
-    return 0;
-}
-
-
+ // Ex3
 int main() {
     int n = 10000;
     int n_streams = 3;
