@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <stdlib.h>
 #include <chrono>
-#include "blitz/array.h"
+#include <blitz/array.h>
 #include "tipsy.h"
 #include <math.h>
 #include <new>
@@ -12,11 +12,13 @@
 #include <vector>
 #include <complex>
 #include <fftw3.h>
+#include <numeric>
 #include <mpi.h>
 #include <fftw3-mpi.h>
+#include "gpufft.h"
 #include <algorithm>
+#include <cuda.h>
 #include <cufft.h>
-
 
 int wrap_edge(int coordinate, int N)
 {
@@ -87,13 +89,13 @@ int get_i_bin(double k, int n_bins, int nGrid, int task = 1)
     }
 }
 
-void save_binning(const int binning, std::vector<float> &fPower, std::vector<int> &nPower)
+void save_binning(const int binning, std::vector<double> &fPower, std::vector<int> &nPower)
 {
     const char *binning_filename;
     switch (binning)
     {
     case 1:
-        binning_filename = "linear_binning.csv";
+        binning_filename = "/users/okondrat/ex10/linear_binning.csv";
         break;
     case 2:
         binning_filename = "variable_binning.csv";
@@ -105,10 +107,10 @@ void save_binning(const int binning, std::vector<float> &fPower, std::vector<int
 
     std::ofstream f1(binning_filename);
     f1.precision(6);
-    f1 << "P_k,k" << std::endl;
+    f1 << "P_k,k,n" << std::endl;
     for (int i = 0; i < fPower.size(); ++i)
     {
-        f1 << (nPower[i] != 0 ? (fPower[i] / nPower[i]) : 0) << "," << i + 1 << std::endl;
+        f1 << (nPower[i] != 0 ? (fPower[i] / nPower[i]) : 0) << "," << i + 1 << "," << nPower[i] << std::endl;
     }
     f1.close();
 }
@@ -200,12 +202,18 @@ struct particle
 bool compare_particles(const particle &a, const particle &b)
 {
     return (a.x < b.x);
-}
+};
+
+struct stream_info {
+    void* slab_gpu;
+    void* work_gpu;
+    cudaStream_t stream;
+};
+
+
 
 int main(int argc, char *argv[])
 {
-    cudaSetDevice(0); 
-
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
 
@@ -235,14 +243,13 @@ int main(int argc, char *argv[])
     const char *out_filename = (argc > 4) ? argv[4] : "projected.csv";
 
     // Init FFTW
-    cufftHandle plan;
-    cufftResult result = cufftCreate(&plan);
-    cufftSetAutoAllocation(plan, CUFFT_NO_AUTO_ALLOCATE);
-
+    fftwf_mpi_init();
     ptrdiff_t start0, local0;
     ptrdiff_t start1, local1;
-    auto alloc_local = fftwf_mpi_local_size_3d_transposed(nGrid, nGrid, nGrid / 2 + 1, MPI_COMM_WORLD, &local0, &start0, &local1, &start1);
-
+    ptrdiff_t n_transpose[] = {nGrid, nGrid};
+    auto alloc_local = fftwf_mpi_local_size_many_transposed(2, n_transpose, nGrid + 2,
+                                                            FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK, MPI_COMM_WORLD,
+                                                            &local0, &start0, &local1, &start1);
     // Collect all start0 and local0
     std::vector<int> all_start0(N_rank);
     std::vector<int> all_local0(N_rank);
@@ -344,15 +351,15 @@ int main(int argc, char *argv[])
 
     printf("[Rank %d] first particle = %f, last particle = %f\n", i_rank, r_local(0, 0), r_local(part_count - 1, 0));
     int grid_start = start0;
-    int grid_end = std::min(int(start0 + local0 - 1), int(nGrid)) + order;
+    int grid_end = std::min(int(start0 + local0), nGrid) + order - 1;
 
     // Complex grid creation with local1 and start1
     int grid_start_complex = start1;
-    int grid_end_complex = std::min(int(start1 + local1 - 1), int(nGrid)) + order;
-
-    // Make sure that we have room for the ghost region
+    int grid_end_complex = std::min(int(start1 + local1), nGrid);
     alloc_local = std::max(alloc_local, nGrid * (nGrid / 2 + 1) * (local0 + order - 1));
     auto alloc_data = fftwf_alloc_complex(alloc_local);
+
+    // Allocate a slab on the GPU
 
     float *data = reinterpret_cast<float *>(alloc_data);
     blitz::GeneralArrayStorage<3> storage;
@@ -363,12 +370,12 @@ int main(int argc, char *argv[])
     blitz::Array<float, 3> ghost_region = grid(blitz::Range(grid_end - order + 1, grid_end - 1), blitz::Range::all(), blitz::Range::all());
 
     std::complex<float> *complex_data = reinterpret_cast<std::complex<float> *>(data);
-    // the resulting output data are stored with the first two dimensions transposed: n1 × n0 × n2
+
     blitz::GeneralArrayStorage<3> transposed_storage;
     transposed_storage.ordering() = 2, 0, 1;
     transposed_storage.ascendingFlag() = true;
+    transposed_storage.base() = 0, grid_start_complex, 0;
 
-    blitz::Array<std::complex<float>, 3> kdata(complex_data, blitz::shape(nGrid, grid_end_complex - grid_start_complex, nGrid / 2 + 1), transposed_storage);
     start_time = std::chrono::high_resolution_clock::now();
     assign_mass(r_local, 0, part_count, nGrid, grid, order, grid_start, grid_end);
     printf("[Rank %d] Grid sum after mass assignment = %f\n", i_rank, sum(grid));
@@ -383,6 +390,9 @@ int main(int argc, char *argv[])
     {
         printf("Total mass: %f\n", actual_mass);
     }
+
+    // Exchange the ghost regions
+    MPI_Comm comm1, comm2;
 
     if (order != 1)
     {
@@ -501,63 +511,133 @@ int main(int argc, char *argv[])
         printf("After all reduction grid sum = %f\n", actual_mass);
     }
     // Overdensity
-    grid = grid - 1;
+    // grid = grid - 1;
 
-    // Transform plan
-    result = cufftPlan3d(&plan, nGrid, nGrid, nGrid, CUFFT_R2C);
+    float diRhoBar = ((1.0f * nGrid * nGrid * nGrid) / actual_mass);
+    grid = grid * diRhoBar - 1.0f;
+    grid /= (nGrid * nGrid * nGrid);
 
+    start_time = std::chrono::high_resolution_clock::now();
+    printf("[Rank %d] Start 1D\n", i_rank);
+    
 
+    int n[] = {grid.rows(), grid.cols()}; 
+    int inembed[] = {grid.rows(), 2 * (grid.cols() / 2 + 1)};
+    int onembed[] = {grid.rows(), (grid.cols() / 2 + 1)};
+    int istride = 1;                                 
+    int ostride = 1;
+    int howmany = 1;
+    int odist = grid.rows() * (grid.cols() / 2 + 1); 
+    int idist = 2 * odist;                           
 
-    printf("[Rank %d] Plan created\n", i_rank);
-    result = cufftExecR2C(plan, (cufftReal *)data, (cufftComplex *)complex_data);
-    printf("[Rank %d] Plan executed\n", i_rank);
+    cufftHandle plan;
+
+    size_t workSize;
+    cufftCreate(&plan);
+    cufftSetAutoAllocation(plan,0);
+    cufftMakePlanMany(plan,sizeof(n) / sizeof(n[0]), n,
+                  inembed, istride, idist,
+                  onembed, ostride, odist,
+                  CUFFT_R2C, howmany, &workSize);
+    
+    stream_info* streams = new stream_info[3];
+    for (int i = 0; i < 3; i++) {
+	cudaStreamCreate(&streams[i].stream);
+        streams[i].slab_gpu = allocate_cuda_slab_Stream(nGrid, &streams[i].stream);
+	streams[i].work_gpu = allocate_cuda_size_Stream(workSize, &streams[i].stream);
+    }
+   
+    for (int i = grid_start; i <= grid_end - order; i++)
+    {
+        blitz::Array<float, 2> slab = grid(i, blitz::Range::all(), blitz::Range::all());
+        int numStream = i % 3;
+	compute_fft_2D_R2C_Stream(slab, streams[numStream].slab_gpu, &plan, streams[numStream].work_gpu, &streams[numStream].stream);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        destroy_cuda_data_Stream(streams[i].slab_gpu, &streams[i].stream);
+	destroy_cuda_data_Stream(streams[i].work_gpu, &streams[i].stream);
+    }
+
+    delete [] streams;
     cufftDestroy(plan);
-    printf("[Rank %d] Plan destroyed\n", i_rank);
+    printf("[Rank %d] Finish 1D\n", i_rank);
+    diff_load = std::chrono::high_resolution_clock::now() - start_time;
+    std::cout << "2D transform took " << std::setw(9) << diff_load.count() << " s\n";
 
+    // Transpose
+    fftwf_plan plan_transpose = fftwf_mpi_plan_many_transpose(
+        nGrid, nGrid, nGrid + 2,
+        FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK,
+        data,
+        data,
+        MPI_COMM_WORLD, FFTW_ESTIMATE);
+
+    fftwf_execute_r2r(plan_transpose, data, data);
+
+    blitz::Array<std::complex<float>, 3> kdata(complex_data,
+                                               blitz::shape(nGrid, grid_end_complex - grid_start_complex, nGrid / 2 + 1),
+                                               blitz::neverDeleteData,
+                                               transposed_storage);
+    kdata.reindexSelf(blitz::shape(0, grid_start_complex, 0));
+    // Do the 1D transforms
+    constexpr int rank_1d = 1;
+    int n_1d[rank_1d] = {nGrid};
+    int stride_1d = nGrid / 2 + 1;
+    int dist_1d = 1;
+    int howmany_1d = nGrid / 2 + 1;
+    fftwf_plan plan_1d = fftwf_plan_many_dft(1, n_1d, howmany_1d,
+                                             (fftwf_complex *)complex_data, n_1d, stride_1d, dist_1d,
+                                             (fftwf_complex *)complex_data, n_1d, stride_1d, dist_1d,
+                                             FFTW_FORWARD, FFTW_ESTIMATE);
+    for (int i = grid_start_complex; i < grid_end_complex; ++i)
+    {
+        fftwf_execute_dft(plan_1d,
+                          (fftwf_complex *)(&kdata(0, i, 0)),
+                          (fftwf_complex *)(&kdata(0, i, 0)));
+    }
+    printf("[Rank %d] FFT finished \n", i_rank);
     // Linear binning is 1
     // Variable binning is 2
     // Log binning is 3
-    const int binning = 2;
+    const int binning = 1;
 
     int n_bins = 80;
     if (binning == 1)
     {
         n_bins = nGrid;
     }
-    std::vector<float> fPower(n_bins, 0.0);
+
+    n_bins = 50;
+    std::vector<double> fPower(n_bins, 0.0);
     std::vector<int> nPower(n_bins, 0);
     float k_max = sqrt((nGrid / 2.0) * (nGrid / 2.0) * 3.0);
 
     // loop over δ(k) and compute k from kx, ky and kz
-    for (auto it = kdata.begin(); it != kdata.end(); ++it)
+    for (auto ii = kdata.begin(); ii != kdata.end(); ++ii)
     {
-        int kx = k_indx(it.position()[0], nGrid);
-        int ky = k_indx(it.position()[1], nGrid);
-        int kz = it.position()[2];
-
+        auto bin = [n_bins, nGrid](int k)
+        { return k <= n_bins ? k : k - nGrid; };
+        auto kx = bin(ii.position()[0]);
+        auto ky = bin(ii.position()[1]);
+        auto kz = ii.position()[2];
         float k = sqrt(kx * kx + ky * ky + kz * kz);
-        int i_bin = get_i_bin(k, n_bins, nGrid, binning);
-        if (i_bin == fPower.size())
-            i_bin--;
-        fPower[i_bin] += std::norm(*it);
-        nPower[i_bin] += 1;
+        auto i = int(k);
+        if (i > 0 && i < n_bins)
+        {
+            fPower[i] += std::norm(*ii);
+            nPower[i] += 1;
+        }
     }
 
     if (i_rank == 0)
     {
-        MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-    else
-    {
-        MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    }
-
-    if (i_rank == 0)
-    {
+        MPI_Reduce(MPI_IN_PLACE, fPower.data(), fPower.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
         MPI_Reduce(MPI_IN_PLACE, nPower.data(), nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     }
     else
     {
+        MPI_Reduce(fPower.data(), nullptr, fPower.size(), MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
         MPI_Reduce(nPower.data(), nullptr, nPower.size(), MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     }
 
@@ -566,5 +646,7 @@ int main(int argc, char *argv[])
         save_binning(binning, fPower, nPower);
     }
 
+    fftwf_destroy_plan(plan_transpose);
+    fftwf_destroy_plan(plan_1d);
     MPI_Finalize();
 }
