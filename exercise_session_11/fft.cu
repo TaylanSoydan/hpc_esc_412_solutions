@@ -45,20 +45,20 @@ void compute_fft_2D_R2C(blitz::Array<float, 2> &grid, void *data)
     int n[] = {grid.rows(), grid.cols()}; // 2D FFT of length NxN
     int inembed[] = {grid.rows(), 2 * (grid.cols() / 2 + 1)};
     int onembed[] = {grid.rows(), (grid.cols() / 2 + 1)};
-    int istride = 1;                                 // Elements of each FFT are adjacent
+    int istride = 1;                                 
     int ostride = 1;
     int howmany = 1;
-    int odist = grid.rows() * (grid.cols() / 2 + 1); // Output distance is in "complex"
-    int idist = 2 * odist;                           // Input distance is in "real"
+    int odist = grid.rows() * (grid.cols() / 2 + 1); 
+    int idist = 2 * odist;                           
 
 
     cufftHandle plan;
-/*
-    cufftPlanMany(&plan, sizeof(n) / sizeof(n[0]), n,
-                  inembed, istride, idist,
-                  onembed, ostride, odist,
-                  CUFFT_R2C, howmany);
-*/
+//
+//    cufftPlanMany(&plan, sizeof(n) / sizeof(n[0]), n,
+//                  inembed, istride, idist,
+//                  onembed, ostride, odist,
+//                  CUFFT_R2C, howmany);
+//
 
 
     size_t workSize;
